@@ -12,5 +12,11 @@ def predict():
     result = sid.polarity_scores(request.get_json()['data'])
     return jsonify(result)
 
+@app.route('/sum', methods=['POST'])
+def sum():
+    result = request.get_json()['data']
+    print(result)
+    return jsonify(result)
+
 if __name__ == '__main__':
     app.run(port=9000)

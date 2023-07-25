@@ -13,44 +13,81 @@ services:
     extra_hosts:
       - "moby:127.0.0.1"
 
-  kafka:
-    image: confluentinc/cp-kafka:5.2.0
-    hostname: kafka
-    container_name: kafka
-    ports:
-      - '9092:9092'
+  broker:
+    image: confluentinc/cp-kafka:7.3.0
+    hostname: broker
+    container_name: broker
     depends_on:
       - zookeeper
+    ports:
+      - "9092:9092"
+      - "9101:9101"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
 
-    extra_hosts:
-      - "moby:127.0.0.1"
+  questdb:
+    image: questdb/questdb:6.6.1
+    hostname: questdb
+    container_name: questdb
+    ports:
+      - "9000:9000"
+      - "9009:9009"
 
-  kafka-create-topics:
-    image: confluentinc/cp-kafka:5.2.0
+  kafka-connect:
+    image: cp-kafka-connect-questdb
+    hostname: connect
+    container_name: connect
+    build:  
+      context: ./docker/kafka-connect
+      dockerfile: ./Dockerfile
     depends_on:
-      - kafka
-    hostname: kafka-create-topics
-    command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b kafka:9092 1 20 && \
-                       kafka-topics --create --topic test --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 && \
-                       sleep infinity'"
+      - broker
+      - zookeeper
+    ports:
+      - "8083:8083"
     environment:
-      KAFKA_BROKER_ID: ignored
-      KAFKA_ZOOKEEPER_CONNECT: ignored
-    extra_hosts:
-      - "moby:127.0.0.1"
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
 
   jupyter-client:
     image: demo-pyspark-notebook
+    container_name: python-playground-consumer
     ports:
       - '8888:8888'
+      - '4040:4040'
     # Want the jupyter-client to start last so we can more easily see the URL/Token to use when launching Jupyter Labs in the browser
     depends_on:
-      - kafka
-  
+      - broker
+      
+  kafka_ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka_ui
+    ports:
+      - "8080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    depends_on:
+      - broker
+
