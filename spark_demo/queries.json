@@ -1,0 +1,10 @@
+{
+    "query" : "select * from alt_liquidations where amount > 1000",
+    "liqsHourly" : "select ticker, sum(amount), side from 'alt_liquidations' where timestamp > dateadd('h', -{}, now());",
+    "liqsMinutely" : "select ticker, sum(amount), side from 'alt_liquidations' where timestamp > dateadd('m', -{}, now());",
+    "amountLiqd" : "select sum(amount), side from 'alt_liquidations' group by side",
+    "sampled15m" : "select ticker, sum(amount), timestamp from 'alt_liquidations' sample by 15m order by sum(amount) DESC",
+    "liqCountAmount" : "select count(), sum(amount), side, timestamp from 'alt_liquidations' sample by 5m",
+    "tickerLiqCountAmount" : "select count(), sum(amount), side, avg(price), timestamp from 'alt_liquidations' where ticker = '{}' sample by 5m",
+    "log" : "select ticker, amount, side, price from 'alt_liquidations' order by timestamp desc limit 10"
+}
