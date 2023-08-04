@@ -72,5 +72,10 @@ def get_log():
     result = query_quest(queries['log'])
     return jsonify(result)
 
+@app.route('/latestTs', methods=['POST'])
+def get_latestTs():
+    result = query_quest(queries['latestTs'])
+    return jsonify(result)
+
 if __name__ == '__main__':
     app.run(port=1337)

@@ -1,25 +1,34 @@
 from cryptofeed import FeedHandler
-from cryptofeed.backends.kafka import BookKafka, TradeKafka
-from cryptofeed.defines import L2_BOOK, TRADES, L3_BOOK
+from cryptofeed.backends.kafka import BookKafka, TradeKafka, LiquidationsKafka
+from cryptofeed.defines import L2_BOOK, TRADES, L3_BOOK, LIQUIDATIONS
 from cryptofeed.exchanges import Coinbase, Binance, Bitfinex
 
 feed_dict = {
-    Bitfinex : {
-        'max_depth': 25,
-        'channels': [TRADES, L2_BOOK],
-        'symbols': ['ETH-USD'],
-    },
-    Coinbase : {
-        'max_depth': 25,
-        'channels': [TRADES, L2_BOOK],
-        'symbols': ['ETH-USD'],
+    # Bitfinex : {
+    #     'max_depth': 25,
+    #     'channels': [TRADES, L2_BOOK],
+    #     'symbols': ['ETH-USD'],
+    # },
+    # Coinbase : {
+    #     'max_depth': 25,
+    #     'channels': [TRADES, L2_BOOK],
+    #     'symbols': ['ETH-USD'],
+    # }, 
+    Binance : {
+        'channels': [LIQUIDATIONS],
+        'symbols': ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT'],
     }
 }
+async def liquidations(f):
+
+
 
 def main():
     f = FeedHandler()
     HOSTNAME = 'broker:29092'
-    cbs = {TRADES: TradeKafka(bootstrap_servers=HOSTNAME), L2_BOOK: BookKafka(bootstrap_servers=HOSTNAME)}
+    cbs = {TRADES: TradeKafka(bootstrap_servers=HOSTNAME), 
+           L2_BOOK: BookKafka(bootstrap_servers=HOSTNAME),
+           LIQUIDATIONS: LiquidationsKafka(bootstrap_servers=HOSTNAME)}
 
     for exchange, params in feed_dict.items():
         f.add_feed(exchange(max_depth=params['max_depth'], channels=params['channels'], symbols=params['symbols'], callbacks=cbs))
