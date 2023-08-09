@@ -1,0 +1,8 @@
+requests
+asyncio
+kafka-python
+numpy
+pandas
+datetime
+streamlit
+websockets

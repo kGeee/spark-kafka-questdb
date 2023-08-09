@@ -1,0 +1,29 @@
+{
+    "name": "sink-eth-trades",
+    "config": {
+      "connector.class":"io.questdb.kafka.QuestDBSinkConnector",
+      "tasks.max":"1",
+      "topics": "trades-BITFINEX-ETH-USD, trades-COINBASE-ETH-USD",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "false",
+      "host": "questdb"
+    }
+  }
+  
+  {
+    "name": "questdb-sink-crypto",
+        "config": {
+            "connector.class":"io.questdb.kafka.QuestDBSinkConnector",
+            "tasks.max":"1",
+            "topics": "topic_ETH, topic_BTC, topic_SOL",
+            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "key.converter.schemas.enable": "false",
+            "value.converter.schemas.enable": "false",
+            "host": "questdb",
+            "timestamp.field.name": "timestamp",
+            "symbols":"currency"
+        }
+    }
