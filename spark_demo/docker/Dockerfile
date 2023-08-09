@@ -10,12 +10,8 @@ USER $NB_UID
 
 ENV JUPYTER_ENABLE_LAB="yes"
 
-RUN ls
-COPY --chown=jovyan:users app.py /home/jovyan/work
-COPY --chown=jovyan:users ./spark_demo.ipynb /home/jovyan/work
-COPY --chown=jovyan:users ./cryptofeed_producers.py /home/jovyan/work
-COPY --chown=jovyan:users ./liq_producers.py /home/jovyan/work
-COPY --chown=jovyan:users ./config.ini /home/jovyan/work
+ADD --chown=jovyan:users src /home/jovyan/work
+ADD --chown=jovyan:users producers /home/jovyan/work
 COPY --chown=jovyan:users ./jars/spark-sql-kafka-0-10_2.12-3.0.0.jar /opt/conda/lib/python3.8/site-packages/pyspark/jars
 COPY --chown=jovyan:users ./jars/spark-sql-kafka-0-10_2.12-3.0.0.jar /home/jovyan/.ivy2/jars
 

@@ -1,7 +1,7 @@
 from cryptofeed import FeedHandler
 from cryptofeed.backends.kafka import BookKafka, TradeKafka, LiquidationsKafka
 from cryptofeed.defines import L2_BOOK, TRADES, L3_BOOK, LIQUIDATIONS
-from cryptofeed.exchanges import Coinbase, Binance, Bitfinex
+from cryptofeed.exchanges import Coinbase, BinanceFutures, Bitfinex, OKX
 
 feed_dict = {
     # Bitfinex : {
@@ -14,14 +14,11 @@ feed_dict = {
     #     'channels': [TRADES, L2_BOOK],
     #     'symbols': ['ETH-USD'],
     # }, 
-    Binance : {
+    BinanceFutures : {
         'channels': [LIQUIDATIONS],
-        'symbols': ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT'],
+        'symbols': ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT'],
     }
 }
-async def liquidations(f):
-
-
 
 def main():
     f = FeedHandler()
@@ -31,7 +28,10 @@ def main():
            LIQUIDATIONS: LiquidationsKafka(bootstrap_servers=HOSTNAME)}
 
     for exchange, params in feed_dict.items():
-        f.add_feed(exchange(max_depth=params['max_depth'], channels=params['channels'], symbols=params['symbols'], callbacks=cbs))
+        f.add_feed(exchange( 
+                            channels=params['channels'], 
+                            symbols=params['symbols'], 
+                            callbacks=cbs))
     # # Add trade and lv 2 bitcoin data to Feed
     # f.add_feed(Bitfinex(max_depth=25, channels=[TRADES, L2_BOOK], symbols=['BTC-USD'], callbacks=cbs))
     # # f.add_feed(Binance(max_depth=25, channels=[TRADES, L2_BOOK], symbols=['BTC-BUSD'], callbacks=cbs))

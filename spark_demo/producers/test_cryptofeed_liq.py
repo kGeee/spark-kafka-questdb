@@ -4,6 +4,7 @@ from cryptofeed.exchanges import EXCHANGE_MAP
 from cryptofeed.exchanges import Coinbase, Binance, Bitfinex, OKX
 
 async def liquidations(data, receipt):
+    print(data)
     if float(data.quantity) > 1000:
         print(f'{receipt} Symbol: {data.symbol} Side: {data.side} Quantity: {data.quantity} Price: {data.price}')
 

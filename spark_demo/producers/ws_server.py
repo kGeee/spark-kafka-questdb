@@ -5,10 +5,10 @@ from kafka import KafkaProducer
 import datetime, time
 
 producer = KafkaProducer(bootstrap_servers='broker:29092')
-topic = 'alt_liquidations'
 
 async def nance_usdm_liq_ws():
     msg = {"method": "SUBSCRIBE", "params": ["!forceOrder@arr"], "id": 1}
+    topic = 'alt_liquidations'
 
     async with websockets.connect(
         "wss://fstream.binance.com/stream?streams=!forceOrder@arr"
