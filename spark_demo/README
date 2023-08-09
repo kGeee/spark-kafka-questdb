@@ -1,0 +1,76 @@
+# readme
+
+
+This is a docker-compose application that creates various images to create a realtime data analytics system.
+
+This is a standalone application and should not be used in a production environment.
+
+This system includes the following technologies
+1. Apache Kafka
+2. Apache Spark
+3. QuestDB
+4. Python
+
+### Apache Kafka
+Distributed event streaming platform
+Allows us to handle messages from various places with a publisher/subscriber model. We can create topics to stream to and from using Kafka as a broker. In this application, we are using a Kafka Connect sink to transfer our data from the broker into the QuestDB database as the events come in. 
+
+###  QuestDB
+Timeseries optimized database built on top of Postgres
+Allows sampling of data by buckets - SAMPLE keyword
+
+### Webserver
+Currently using Flask as a backend to connect to QuestDB REST API
+Endpoints are the specified queries built for the dashboard.
+
+To create new queries you simply need to add your query to the queries.json file. You can then use them in the streamlit application by calling `hitEndpoint(key)`, where key is the key you specified in the json file. If you need to do extra processing or parameterize the query, you can create a new endpoint in the Flask app. 
+
+### Streamlit
+
+Streamlit dashboard populates via the queries specified in the queries.json file. 
+
+We achieve "pseudo realtime updates" by polling the database for the latest timestamp every N seconds and refresh data if newer timestamp arrives. 
+
+### Producers
+This project currently employs both a direct websocket connection to the Binance forceOrder server along with utilizing the cryptofeed library to producer messages to the Kafka broker. However, creating new connections should be relatively straightforward using the ws_server.py file as an example. 
+
+Producers are subscribed to the 'alt_liquidations' topic. You can easily create new topics by changing the topic variable however you must also remember to configure a sink with that new topic name to ensure the data gets to QuestDB
+
+Creating the Kafka Connect sink is relatively straightforward. As per the Docker compose application, Kafka Connect exports port 8083. We simply create a POST request to the connectors endpoint with some configs to create the connector. 
+
+`curl -X POST -H "Accept:application/json" -H "Content-Type:application/json" --data @altliqs.json http://localhost:8083/connectors`
+
+altliqs.json file looks like this
+
+`{
+    "name": "binance-liqs",
+    "config": {
+      "connector.class":"io.questdb.kafka.QuestDBSinkConnector",
+      "tasks.max":"1",
+      "topics": "alt_liquidations",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "false",
+      "host": "questdb",
+      "transforms": "insertTS",
+      "transforms.insertTS.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+      "transforms.insertTS.field": "timestamp"
+    }
+  }`
+
+There's also an example file in the src folder. 
+
+After the connector is created and running, you should be ready to turn on the producers. 
+
+To do so, enter into the docker shell for the jupyter-client, navigate to the work folder via
+`cd work`
+
+From here, depending on which producers you want to turn on, you can turn on the producer by executing the python function. 
+`python ws_server.py`
+
+
+Once the producers have turned on, to monitor the dataflowing in we can use the KafkaUI that's also included within the Dockerfile. This is definitely not needed to use the project but can be helpful while debugging. 
+
+Finally, you can start the streamlit application by using the command `streamlit run dashapp.py`. You should be welcomed with a dashboard that's updating in realtime!
+
