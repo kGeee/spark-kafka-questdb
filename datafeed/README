@@ -77,6 +77,4 @@ dashboard that's updating in realtime!
 ### QUICKSTART
 1. docker compose build
 2. docker compose up -d
-3. docker exec -it python_playground bash
-4. python work/producers/binance_liq_producer.py
-5. In src directory, run `bash run.sh` to create Kafka connect sink, start webserver and streamlit dashboard.
+3. In src directory, run `bash run.sh` to create Kafka connect sink, start webserver and streamlit dashboard.

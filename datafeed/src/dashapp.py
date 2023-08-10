@@ -66,9 +66,9 @@ def liq_lookback():
 
 def liq_progress(threshold=1000000):
     df = hit_endpoint("query/amountLiqd")
-    try: longs_liqd = int(df[df["side"] == "Long"]["sum"][1])
+    try: longs_liqd = int(df[df["side"] == "Long"]["sum"][0])
     except KeyError: longs_liqd = 0
-    try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][0])
+    try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][1])
     except KeyError: shorts_liqd = 0
     col1, col2 = st.columns(2)
     col1.metric("Longs liqd", f"${int(longs_liqd)}")
