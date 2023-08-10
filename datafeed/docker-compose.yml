@@ -36,13 +36,13 @@ services:
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
 
-  questdb:
-    image: questdb/questdb:6.6.1
-    hostname: questdb
-    container_name: questdb
-    ports:
-      - "9000:9000"
-      - "9009:9009"
+  # questdb:
+  #   image: questdb/questdb:6.6.1
+  #   hostname: questdb
+  #   container_name: questdb
+  #   ports:
+  #     - "9000:9000"
+  #     - "9009:9009"
 
   kafka-connect:
     image: cp-kafka-connect-questdb

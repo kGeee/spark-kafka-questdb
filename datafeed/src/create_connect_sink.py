@@ -10,7 +10,7 @@ while True:
         "value.converter": "org.apache.kafka.connect.json.JsonConverter",
         "key.converter.schemas.enable": "false",
         "value.converter.schemas.enable": "false",
-        "host": "questdb",
+        "host": "provider.bdl.computer:31103",
         "timestamp.field.name": "timestamp"
       }
     }

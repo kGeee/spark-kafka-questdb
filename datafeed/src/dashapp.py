@@ -15,7 +15,7 @@ def get_latest_ts():
     except KeyError:
         return "2023-08-10T00:41:54.000000Z"
 
-@st.cache_data(ttl=3)
+@st.cache_data(ttl=3,show_spinner=False)
 def hit_endpoint(endpoint, data={}):
     resp = requests.get(f"http://localhost:1337/{endpoint}", data=data)
     r = json.loads(resp.text)
@@ -23,8 +23,20 @@ def hit_endpoint(endpoint, data={}):
     except: df = pd.DataFrame()
     return df
 
-def all_trades():
-    result = hit_endpoint("query/all")
+def get_all_data():
+    d = {
+        'all' : hit_endpoint("query/all"),
+        '1hSampled' : hit_endpoint("query/sampled15m"),
+        '15m': hit_endpoint("liqsMinutely/15m"),
+        '1h': hit_endpoint("liqsHourly/1h"),
+        'amtLiqd': hit_endpoint("query/amountLiqd"),
+        'liqCountAmount': hit_endpoint("query/liqCountAmount"),
+        'log': hit_endpoint("query/log"),
+    }
+    return d
+
+def all_trades(result):
+    # result = hit_endpoint("query/all")
     fig = px.scatter(
         result,
         x="timestamp",
@@ -36,21 +48,19 @@ def all_trades():
     )
     st.plotly_chart(fig)
 
-
-def one_hour_sampled():
-    sampled_hour = hit_endpoint("query/sampled15m")
+def one_hour_sampled(sampled_hour):
+    # sampled_hour = hit_endpoint("query/sampled15m")
     st.plotly_chart(
         px.bar(sampled_hour, x="ticker", y="sum", width=1500),
         title="Total Liquidation Data (sampled hourly)",
     )
 
-
-def liq_lookback():
+def liq_lookback(m15, hourly):
     tf = st.selectbox("Timeframe", options=["15m", "1h", "12h", "24h"])
     if tf == "15m":
-        df_last_hour = hit_endpoint("liqsMinutely/{}".format(tf))
+        df_last_hour = m15
     else:
-        df_last_hour = hit_endpoint("liqsHourly/{}".format(tf))
+        df_last_hour = hourly
     color_discrete_map = {'Long':'#73efff', 
                           'Short':'#0068c9'}
     st.plotly_chart(
@@ -64,9 +74,7 @@ def liq_lookback():
             color_discrete_map=color_discrete_map)
     )
 
-
-def liq_progress(threshold=1000000):
-    df = hit_endpoint("query/amountLiqd")
+def liq_progress(df, threshold=1000000):
     try: longs_liqd = int(df[df["side"] == "Long"]["sum"][0])
     except KeyError: longs_liqd = 0
     try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][1])
@@ -77,9 +85,7 @@ def liq_progress(threshold=1000000):
     st.progress((longs_liqd % threshold) / threshold, text="longs liqd")
     st.progress((shorts_liqd % threshold) / threshold, text="shorts liqd")
 
-
-def liq_count_and_amount():
-    liq_count_amount = hit_endpoint("query/liqCountAmount")
+def liq_count_and_amount(liq_count_amount):
     liq_count, liq_amount = (
         liq_count_amount[["count", "side", "timestamp"]],
         liq_count_amount[["sum", "side", "timestamp"]],
@@ -111,7 +117,6 @@ def liq_count_and_amount():
                 color_discrete_map=color_discrete_map
             )
         )
-
 
 def liq_count_and_amount_ticker(ticker):
     liq_count_amount = hit_endpoint(f"tickerLiqCountAmount/{ticker}")
@@ -148,9 +153,7 @@ def liq_count_and_amount_ticker(ticker):
         )
     )
 
-
-def liq_log():
-    df = hit_endpoint("query/log")
+def liq_log(df):
 
     # CSS to inject contained in a string
     hide_table_row_index = """
@@ -182,18 +185,20 @@ def main():
     if not "latestTs" in st.session_state:
         st.session_state.latestTs = get_latest_ts()
 
-    liq_progress()
+    d = get_all_data()
+
+    liq_progress(d['amtLiqd'])
 
     col1, col2 = st.columns(2)
-    with col1: all_trades()
-    with col2: liq_log()
+    with col1: all_trades(d['all'])
+    with col2: liq_log(d['log'])
 
     col3, col4 = st.columns(2)
 
-    with col3: liq_lookback()
-    with col4: liq_count_and_amount()
+    with col3: liq_lookback(d['15m'],d['1h'])
+    with col4: liq_count_and_amount(d['liqCountAmount'])
 
-    one_hour_sampled()
+    one_hour_sampled(d['1hSampled'])
 
     ticker = st.text_input("ticker", value="ETH")
     liq_count_and_amount_ticker(ticker)

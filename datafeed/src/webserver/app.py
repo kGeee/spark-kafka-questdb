@@ -6,7 +6,7 @@ app = Flask(__name__)
 with open('src/webserver/queries.json') as f: queries = json.load(f)
 
 def query_quest(query):
-    resp = requests.get('http://localhost:9000/exec',
+    resp = requests.get('http://provider.bdl.computer:31103/exec',
                         {'query': query})
     r = json.loads(resp.text)
     return r
