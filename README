@@ -25,7 +25,8 @@ Allows sampling of data by buckets - SAMPLE keyword
 Currently using Flask as a backend to connect to QuestDB REST API
 Endpoints are the specified queries built for the dashboard.
 
-To create new queries you simply need to add your query to the queries.json file. You can then use them in the streamlit application by calling `hitEndpoint(key)`, where key is the key you specified in the json file. If you need to do extra processing or parameterize the query, you can create a new endpoint in the Flask app. 
+To create new queries you simply need to add your query to the queries.json file. You can then use them in the streamlit application by calling `hitEndpoint(key)`, where key is the key you specified in the json file. If you need to do extra processing or parameterize the query, you can 
+create a new endpoint in the Flask app. 
 
 ### Streamlit
 
@@ -39,7 +40,8 @@ This project currently employs both a direct websocket connection to the Binance
 
 ## Setup
 
-The set up process for this application should be relatively straight forward. The example included contains implementation for a websocket connection and a telegram connection, but you can use any data source you want as long as you create a producer and send messages to the Kafka topic.  
+The set up process for this application should be relatively straight forward. The example included contains implementation for a websocket 
+connection and a telegram connection, but you can use any data source you want as long as you create a producer and send messages to the Kafka topic.  
 
 To spin up the application, run `docker compose build` in the datafeed directory. This should build the application
 Then run `docker compose up` to start the application. Give it a couple of minutes to get bootup up properly. 
@@ -51,7 +53,6 @@ Now that the broker is set up, we need to create the sink for our data to reach 
 Creating the Kafka Connect sink is relatively straightforward. As per the Docker compose application, Kafka Connect exports port 8083. We simply create a POST request to the connectors endpoint with some configs to create the connector. Example request json has been provided in the kafka-connect-sinks folder along with an simple script to post the request. Run the `create_connect_sink.py` script with the config that you choose. Things to note are that the names of connectors are to be unique and that you can have multiple topics per connector via comma-separated values. 
 
 After the connector is created and running, you should be ready to turn on the producers. 
-
 To do so, enter into the docker shell for the jupyter-client, navigate to the work folder via
 `cd work`
 
@@ -60,11 +61,21 @@ From here, depending on which producers you want to turn on, you can turn on the
 
 You can also visit QuestDB query playground via `localhost:9000`. 
 
-Once the producers have turned on, to monitor the data flowing in we can use the KafkaUI that's also included within the Dockerfile. This is definitely not needed to use the project but can be helpful while debugging. 
+Once the producers have turned on, to monitor the data flowing in we can use the KafkaUI that's also included within the Dockerfile. 
+This is definitely not needed to use the project but can be helpful while debugging. 
 
 Finally, we need to turn on our webserver so that our streamlit frontend can get data from the QuestDB database! 
-Create a new shell in the python-playground and navigate to the `work/src/webserver` directory and run `python app.py`.
-Notice that the queries.json file is where the queries for the backend live. You can create new queries by adding them in that file along with creating a new endpoint in the Flask app. 
+Navigate to the `work/src/webserver` directory and run `python app.py`.
+Notice that the queries.json file is where the queries for the backend live. You can create new queries by adding them in that file 
+along with creating a new endpoint in the Flask app. 
 
-Finally, you can start the streamlit application by using the command `streamlit run dashapp.py`. You should be welcomed with a dashboard that's updating in realtime!
+Finally, you can start the streamlit application by using the command `streamlit run dashapp.py`. You should be welcomed with a 
+dashboard that's updating in realtime!
 
+
+
+### QUICKSTART
+In the datafeed directory
+1. bash src/scripts/run.sh - wait for all the services to start
+2. bash src/scripts/create_sink.sh - create sink for kafka connect -> questdb
+3. bash src/scripts/start_dashboard.sh - start producer within python container, start webserver and streamlit dash
