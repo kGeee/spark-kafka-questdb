@@ -6,3 +6,5 @@ pandas
 datetime
 streamlit
 websockets
+cryptofeed
+aiokafka

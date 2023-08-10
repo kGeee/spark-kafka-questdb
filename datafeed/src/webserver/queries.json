@@ -1,11 +1,11 @@
 {
-    "all": "select * from alt_liquidations where timestamp > dateadd('m', -30, now())",
-    "liqsHourly": "select ticker, sum(amount), side from 'alt_liquidations' where timestamp > dateadd('h', -{}, now()) group by ticker, side order by max(timestamp) asc;",
-    "liqsMinutely": "select ticker, sum(amount), side from 'alt_liquidations' where timestamp > dateadd('m', -{}, now()) group by ticker, side order by max(timestamp) asc;",
-    "amountLiqd": "select sum(amount), side from 'alt_liquidations' group by side",
-    "sampled15m": "select ticker, sum(amount), timestamp from 'alt_liquidations' where timestamp > dateadd('h', -4, now()) sample by 15m order by sum(amount) DESC",
-    "liqCountAmount": "select count(), sum(amount), side, timestamp from 'alt_liquidations' where timestamp > dateadd('h', -4, now()) sample by 5m",
-    "tickerLiqCountAmount": "select count(), sum(amount), side, avg(price), timestamp from 'alt_liquidations' where ticker = '{}' sample by 5m",
-    "log": "select ticker, amount, side, price from 'alt_liquidations' order by timestamp desc limit 14",
-    "latestTs" : "select max(timestamp) from 'alt_liquidations'"
+    "all": "select * from binance_liquidations where timestamp > dateadd('m', -30, now())",
+    "liqsHourly": "select ticker, sum(amount), side from 'binance_liquidations' where timestamp > dateadd('h', -{}, now()) group by ticker, side order by max(timestamp) asc;",
+    "liqsMinutely": "select ticker, sum(amount), side from 'binance_liquidations' where timestamp > dateadd('m', -{}, now()) group by ticker, side order by max(timestamp) asc;",
+    "amountLiqd": "select sum(amount), side from 'binance_liquidations' group by side",
+    "sampled15m": "select ticker, sum(amount), timestamp from 'binance_liquidations' where timestamp > dateadd('h', -4, now()) sample by 15m order by sum(amount) DESC",
+    "liqCountAmount": "select count(), sum(amount), side, timestamp from 'binance_liquidations' where timestamp > dateadd('h', -4, now()) sample by 5m",
+    "tickerLiqCountAmount": "select count(), sum(amount), side, avg(price), timestamp from 'binance_liquidations' where ticker = '{}' sample by 5m",
+    "log": "select ticker, amount, side, price from 'binance_liquidations' order by timestamp desc limit 14",
+    "latestTs" : "select max(timestamp) from 'binance_liquidations'"
 }

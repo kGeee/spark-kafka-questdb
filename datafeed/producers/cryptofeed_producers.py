@@ -11,8 +11,8 @@ feed_dict = {
     # },
     # Coinbase : {
     #     'max_depth': 25,
-    #     'channels': [TRADES, L2_BOOK],
-    #     'symbols': ['ETH-USD'],
+    #     'channels': [TRADES],
+    #     'symbols': ['BTC-USD','ETH-USD'],
     # }, 
     BinanceFutures : {
         'channels': [LIQUIDATIONS],
@@ -28,8 +28,7 @@ def main():
            LIQUIDATIONS: LiquidationsKafka(bootstrap_servers=HOSTNAME)}
 
     for exchange, params in feed_dict.items():
-        f.add_feed(exchange( 
-                            channels=params['channels'], 
+        f.add_feed(exchange(channels=params['channels'], 
                             symbols=params['symbols'], 
                             callbacks=cbs))
     # # Add trade and lv 2 bitcoin data to Feed

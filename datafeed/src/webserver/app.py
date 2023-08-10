@@ -1,16 +1,13 @@
-from flask import Flask, jsonify, request
-import json
+from flask import Flask, jsonify
+import requests, json
 
 app = Flask(__name__)
 
-with open('queries.json') as f: queries = json.load(f)
+with open('webserver/queries.json') as f: queries = json.load(f)
 
 def query_quest(query):
-    import requests, json
     resp = requests.get('http://localhost:9000/exec',
-                        {
-                            'query': query,
-                        })
+                        {'query': query})
     r = json.loads(resp.text)
     return r
 
@@ -18,30 +15,6 @@ def query_quest(query):
 def get_keyedQuery(key):
     result = query_quest(queries[key])
     return jsonify(result)
-# @app.route('/all', methods=['POST'])
-# def get_all():
-#     result = query_quest(queries['query'])
-#     return jsonify(result)
-
-# @app.route('/amountLiqd', methods=['POST'])
-# def get_amtLiqd():
-#     result = query_quest(queries['amountLiqd'])
-#     return jsonify(result)
-
-# @app.route('/sampled15m', methods=['POST'])
-# def get_sampled15m():
-#     result = query_quest(queries['sampled15m'])
-#     return jsonify(result)
-
-# @app.route('/liqCountAmount', methods=['POST'])
-# def get_liqCountAmount():
-#     result = query_quest(queries['liqCountAmount'])
-#     return jsonify(result)
-
-# @app.route('/log', methods=['POST'])
-# def get_log():
-#     result = query_quest(queries['log'])
-#     return jsonify(result)
 
 @app.route('/latestTs', methods=['GET','POST'])
 def get_latestTs():

@@ -7,17 +7,20 @@ from datetime import date, timedelta
 import requests, json
 
 def get_latest_ts():
-    resp = requests.post(f"http://localhost:1337/latestTs", data={})
-    r = json.loads(resp.text)
-    return r['dataset'][0][0]
+    resp = requests.get(f"http://localhost:1337/latestTs", data={})
+    
+    try:
+        r = json.loads(resp.text)
+        return r['dataset'][0][0]
+    except KeyError:
+        return "2023-08-10T00:41:54.000000Z"
 
 @st.cache_data(ttl=3)
 def hit_endpoint(endpoint, data={}):
-    resp = requests.post(f"http://localhost:1337/{endpoint}", data=data)
+    resp = requests.get(f"http://localhost:1337/{endpoint}", data=data)
     r = json.loads(resp.text)
     df = pd.DataFrame(r["dataset"], columns=[i["name"] for i in r["columns"]])
     return df
-
 
 def all_trades():
     result = hit_endpoint("query/all")
@@ -63,8 +66,10 @@ def liq_lookback():
 
 def liq_progress(threshold=1000000):
     df = hit_endpoint("query/amountLiqd")
-    longs_liqd = int(df[df["side"] == "Long"]["sum"][0])
-    shorts_liqd = int(df[df["side"] == "Short"]["sum"][1])
+    try: longs_liqd = int(df[df["side"] == "Long"]["sum"][1])
+    except KeyError: longs_liqd = 0
+    try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][0])
+    except KeyError: shorts_liqd = 0
     col1, col2 = st.columns(2)
     col1.metric("Longs liqd", f"${int(longs_liqd)}")
     col2.metric("Shorts liqd", f"${int(shorts_liqd)}")
@@ -171,13 +176,7 @@ def main():
         st.session_state.auto_refresh = True
 
     auto_refresh = True
-
-    # if auto_refresh:
-    #     number = st.sidebar.number_input(
-    #         "Refresh rate in seconds", value=st.session_state.sleep_time
-    #     )
     st.session_state.sleep_time = 3
-    # st_autorefresh(interval=5000, key="fizzbuzzcounter")
 
     if not "latestTs" in st.session_state:
         st.session_state.latestTs = get_latest_ts()
@@ -185,17 +184,13 @@ def main():
     liq_progress()
 
     col1, col2 = st.columns(2)
-    with col1:
-        all_trades()
-    with col2:
-        liq_log()
+    with col1: all_trades()
+    with col2: liq_log()
 
     col3, col4 = st.columns(2)
 
-    with col3:
-        liq_lookback()
-    with col4:
-        liq_count_and_amount()
+    with col3: liq_lookback()
+    with col4: liq_count_and_amount()
 
     one_hour_sampled()
 
@@ -205,7 +200,7 @@ def main():
     while auto_refresh:
         ts = get_latest_ts()
         if st.session_state.latestTs != ts:
-            print(st.session_state.latestTs, ts)
+            # print(st.session_state.latestTs, ts)
             st.session_state.latestTs = ts
             st.experimental_rerun()
         else:
