@@ -2,9 +2,10 @@ import asyncio
 import websockets
 import json
 from kafka import KafkaProducer
-import datetime, time
+import time
+from datetime import datetime
 
-testing = True
+testing = False
 if testing: producer = None
 else: producer = KafkaProducer(bootstrap_servers="broker:29092")
 
@@ -33,10 +34,12 @@ async def nance_usdm_liq_ws():
                     "timestamp": int(time.mktime(datetime.now().timetuple()) * 1000),
                     "exch": "BINANCE",
                 }
-                if producer != None: producer.send(topic, value=json.dumps(msg).encode("utf-8"))
-                else: print(msg)
-            except websockets.ConnectionClosed as e:
-                print(f'Terminated', e)
+                producer.send(topic, value=json.dumps(msg).encode("utf-8"))
+                print(msg)
+            except Exception as e:
+                # print(f'Terminated', e)
+                ws = await websockets.connect("wss://fstream.binance.com/stream?streams=!forceOrder@arr")
+                
 
             await asyncio.sleep(2)
 
@@ -72,6 +75,7 @@ async def okx_liq_ws(type="SWAP"):
                 else: print(msg)
             except websockets.ConnectionClosed as e:
                 print(f'Terminated', e)
+                ws = await websockets.connect("wss://ws.okx.com:8443/ws/v5/public")
 
             await asyncio.sleep(2)
 
@@ -80,4 +84,4 @@ async def multiple_tasks():
     input_coroutines = [nance_usdm_liq_ws(), okx_liq_ws(type="FUTURES")]
     await asyncio.gather(*input_coroutines, return_exceptions=True)
 
-asyncio.get_event_loop().run_until_complete(multiple_tasks())
+asyncio.get_event_loop().run_until_complete(nance_usdm_liq_ws())

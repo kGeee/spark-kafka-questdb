@@ -11,7 +11,7 @@ def get_latest_ts():
     r = json.loads(resp.text)
     return r['dataset'][0][0]
 
-@st.cache_data(ttl=5)
+@st.cache_data(ttl=3)
 def hit_endpoint(endpoint, data={}):
     resp = requests.post(f"http://localhost:1337/{endpoint}", data=data)
     r = json.loads(resp.text)
