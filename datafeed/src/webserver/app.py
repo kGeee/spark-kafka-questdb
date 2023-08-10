@@ -3,7 +3,7 @@ import requests, json
 
 app = Flask(__name__)
 
-with open('webserver/queries.json') as f: queries = json.load(f)
+with open('src/webserver/queries.json') as f: queries = json.load(f)
 
 def query_quest(query):
     resp = requests.get('http://localhost:9000/exec',

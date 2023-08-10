@@ -75,6 +75,7 @@ dashboard that's updating in realtime!
 
 
 ### QUICKSTART
-1. docker compose build
-2. docker compose up -d
-3. In src directory, run `bash run.sh` to create Kafka connect sink, start webserver and streamlit dashboard.
+In the datafeed directory
+1. bash src/scripts/run.sh - wait for all the services to start
+2. bash src/scripts/create_sink.sh - create sink for kafka connect -> questdb
+3. bash src/scripts/start_dashboard.sh - start producer within python container, start webserver and streamlit dash

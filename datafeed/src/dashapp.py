@@ -19,7 +19,8 @@ def get_latest_ts():
 def hit_endpoint(endpoint, data={}):
     resp = requests.get(f"http://localhost:1337/{endpoint}", data=data)
     r = json.loads(resp.text)
-    df = pd.DataFrame(r["dataset"], columns=[i["name"] for i in r["columns"]])
+    try: df = pd.DataFrame(r["dataset"], columns=[i["name"] for i in r["columns"]])
+    except: df = pd.DataFrame()
     return df
 
 def all_trades():
