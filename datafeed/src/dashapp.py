@@ -177,7 +177,7 @@ def main():
         st.session_state.auto_refresh = True
 
     auto_refresh = True
-    st.session_state.sleep_time = 3
+    st.session_state.sleep_time = 5
 
     if not "latestTs" in st.session_state:
         st.session_state.latestTs = get_latest_ts()
