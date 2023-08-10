@@ -76,6 +76,6 @@ dashboard that's updating in realtime!
 
 ### QUICKSTART
 In the datafeed directory
-1. bash src/scripts/run.sh - wait for all the services to start
-2. bash src/scripts/create_sink.sh - create sink for kafka connect -> questdb
-3. bash src/scripts/start_dashboard.sh - start producer within python container, start webserver and streamlit dash
+1. `bash src/scripts/run.sh` - wait for all the services to start
+2. `bash src/scripts/create_sink.sh` - create sink for kafka connect -> questdb
+3. `bash src/scripts/start_dashboard.sh` - start producer within python container, start webserver and streamlit dash
