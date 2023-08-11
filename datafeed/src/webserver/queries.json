@@ -1,5 +1,5 @@
 {
-    "all": "select * from binance_liquidations where timestamp > dateadd('m', -30, now())",
+    "all": "select * from 'binance_liquidations' where timestamp > dateadd('m', -30, now())",
     "liqsHourly": "select ticker, sum(amount), side from 'binance_liquidations' where timestamp > dateadd('h', -{}, now()) group by ticker, side order by max(timestamp) asc;",
     "liqsMinutely": "select ticker, sum(amount), side from 'binance_liquidations' where timestamp > dateadd('m', -{}, now()) group by ticker, side order by max(timestamp) asc;",
     "amountLiqd": "select sum(amount), side from 'binance_liquidations' group by side",

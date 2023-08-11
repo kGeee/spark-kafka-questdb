@@ -28,16 +28,17 @@ def on_message(ws, message):
     try:
         msg = {
             "ticker": response["data"]["o"]["s"],
+            "side": "Short" if response["data"]["o"]["S"] == "BUY" else "Long",
+            "exch": "BINANCE",
             "amount": round(
                 float(response["data"]["o"]["q"])
                 * float(response["data"]["o"]["p"]),
                 4,
             ),
             "price": float(response["data"]["o"]["p"]),
-            "side": "Short" if response["data"]["o"]["S"] == "BUY" else "Long",
             "timestamp": int(time.mktime(datetime.now().timetuple()) * 1000),
-            "exch": "BINANCE",
         }
+        print(msg['ticker'])
         producer.send(topic, value=json.dumps(msg).encode("utf-8"))
     except Exception as e:
         pass

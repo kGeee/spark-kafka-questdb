@@ -10,8 +10,11 @@ while True:
         "value.converter": "org.apache.kafka.connect.json.JsonConverter",
         "key.converter.schemas.enable": "false",
         "value.converter.schemas.enable": "false",
-        "host": "provider.bdl.computer:31103",
-        "timestamp.field.name": "timestamp"
+        "host": "provider.bdl.computer:30883",
+        "timestamp.field.name": "timestamp",
+        "table":"binance_liquidations",
+        "symbols":"ticker, side, exch",
+        "doubles":"amount, price",
       }
     }
   try:
