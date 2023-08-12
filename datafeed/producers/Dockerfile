@@ -11,10 +11,9 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 # 
 COPY ./fastapp.py /code/fastapp.py
 COPY ./dashapp.py /code/dashapp.py
-COPY ./quest_db_producer.py /code/quest_db_producer.py
 COPY ./__init__.py /code/__init__.py
-COPY ./queries.json /code/queries.json
 
+ADD producers /code/producers/
 
 # 
 CMD ["python3", "fastapp.py"]

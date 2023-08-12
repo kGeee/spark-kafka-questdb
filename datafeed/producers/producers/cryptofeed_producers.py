@@ -2,6 +2,7 @@ from cryptofeed import FeedHandler
 from cryptofeed.backends.kafka import BookKafka, TradeKafka, LiquidationsKafka
 from cryptofeed.defines import L2_BOOK, TRADES, L3_BOOK, LIQUIDATIONS
 from cryptofeed.exchanges import Coinbase, BinanceFutures, Bitfinex, OKX
+import configparser
 
 feed_dict = {
     # Bitfinex : {
@@ -19,10 +20,12 @@ feed_dict = {
         'symbols': ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT'],
     }
 }
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 def main():
     f = FeedHandler()
-    HOSTNAME = 'broker:29092'
+    HOSTNAME = config['Kafka']['server']
     cbs = {TRADES: TradeKafka(bootstrap_servers=HOSTNAME), 
            L2_BOOK: BookKafka(bootstrap_servers=HOSTNAME),
            LIQUIDATIONS: LiquidationsKafka(bootstrap_servers=HOSTNAME)}

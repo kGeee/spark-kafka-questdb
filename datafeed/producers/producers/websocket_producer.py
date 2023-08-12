@@ -4,10 +4,13 @@ import json
 from kafka import KafkaProducer
 import time
 from datetime import datetime
+import configparser
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 testing = False
 if testing: producer = None
-else: producer = KafkaProducer(bootstrap_servers="broker:29092")
+else: producer = KafkaProducer(bootstrap_servers=config['Kafka']['server'])
 
 
 async def nance_usdm_liq_ws():

@@ -1,17 +1,20 @@
 import uvicorn
 from fastapi import FastAPI, BackgroundTasks
 import json
-import httpx, asyncio
+import httpx, asyncio, os
 
 app = FastAPI()
 
 with open('queries.json') as f: queries = json.load(f)
 
+url = os.environ.get('URL',"provider.bdl.computer")
+port = os.environ.get('PORT', 30793)
+
 async def query_quest(query):
     timeout=httpx.Timeout(10, read=15.0)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.get(f"http://provider.bdl.computer:30255/exec", params={'query': query})
+            resp = await client.get(f"http://{url}:{port}/exec", params={'query': query})
     except httpx.ReadTimeout:
         resp = await query_quest(query)
     return json.loads(resp.text)

@@ -3,6 +3,9 @@ from cryptofeed.defines import LIQUIDATIONS
 from cryptofeed.backends.kafka import BookKafka, TradeKafka, LiquidationsKafka
 from cryptofeed.exchanges import EXCHANGE_MAP
 from cryptofeed.exchanges import Coinbase, Binance, Bitfinex, OKX
+import configparser
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 async def liquidations(data, receipt):
     print(data)
@@ -14,7 +17,7 @@ def main():
     f = FeedHandler()
     configured = []
     exch = {"okx": OKX}
-    HOSTNAME = 'broker:29092'
+    HOSTNAME = config['Kafka']['server']
     print("Querying exchange metadata")
     for exchange_string, exchange_class in exch.items():
         try:

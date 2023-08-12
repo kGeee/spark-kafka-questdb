@@ -1,13 +1,12 @@
 from pprint import pprint
-import os
 import websocket as wb
-from pprint import pprint
-import json
+import os,json,time,configparser
 from kafka import KafkaProducer
-import time
 from datetime import datetime
 
-producer = KafkaProducer(bootstrap_servers="broker:29092")
+config = configparser.ConfigParser()
+config.read("config.ini")
+producer = KafkaProducer(bootstrap_servers=config['Kafka']['server'])
 url = "wss://fstream.binance.com/stream?streams=!forceOrder@arr"
 topic = 'binance_liquidations'
 
@@ -38,7 +37,6 @@ def on_message(ws, message):
             "price": float(response["data"]["o"]["p"]),
             "timestamp": int(time.mktime(datetime.now().timetuple()) * 1000),
         }
-        print(msg['ticker'])
         producer.send(topic, value=json.dumps(msg).encode("utf-8"))
     except Exception as e:
         pass

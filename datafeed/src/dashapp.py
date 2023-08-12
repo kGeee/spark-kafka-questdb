@@ -6,8 +6,10 @@ import time
 from datetime import date, timedelta
 import requests, json
 
+test_url="http://provider.bdl.computer:30793"
+
 def get_latest_ts():
-    resp = requests.get(f"http://6oi78bsks99670gs97niugq8bc.ingress.bdl.computer:30074/latestTs", data={})
+    resp = requests.get(f"http://localhost:8080/latestTs", data={})
     try:
         r = json.loads(resp.text)
         return r['dataset'][0][0]
@@ -16,7 +18,7 @@ def get_latest_ts():
 
 # @st.cache_data(ttl=3, show_spinner=False)
 def hit_endpoint(endpoint, data={}):
-    resp = requests.get(f"http://6oi78bsks99670gs97niugq8bc.ingress.bdl.computer:30074/{endpoint}", data=data)
+    resp = requests.get(f"http://localhost:8080/{endpoint}", data=data)
     r = json.loads(resp.text)
     try: df = pd.DataFrame(r["dataset"], columns=[i["name"] for i in r["columns"]])
     except: df = pd.DataFrame()
@@ -62,7 +64,6 @@ def liq_lookback(tf="15m"):
 
 def liq_progress(threshold=1000000):
     df = hit_endpoint("query/amountLiqd")
-    print(df)
     try: longs_liqd = int(df[df["side"] == "Long"]["sum"][0])
     except KeyError: longs_liqd = int(df[df["side"] == "Long"]["sum"][1])
     try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][1])
