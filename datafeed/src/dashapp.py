@@ -15,7 +15,7 @@ def get_latest_ts():
     except json.JSONDecodeError:
         return "2023-08-10T00:41:54.000000Z"
 
-# @st.cache_data(ttl=3, show_spinner=False)
+@st.cache_data(ttl=3, show_spinner=False)
 def hit_endpoint(endpoint, data={}):
     resp = requests.get(f"{url}/{endpoint}", data=data)
     r = json.loads(resp.text)
@@ -157,7 +157,11 @@ def liq_log():
 
 def main():
     st.set_page_config(page_title="Liquidations - Binance Alts", layout="wide")
-
+    hide = """#MainMenu {
+        visibility: hidden;
+        }
+        """
+    st.markdown(hide, unsafe_allow_html=True)
     # if not "sleep_time" in st.session_state:
     #     st.session_state.sleep_time = 5
 

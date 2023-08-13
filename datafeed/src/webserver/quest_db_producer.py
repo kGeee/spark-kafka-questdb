@@ -21,7 +21,7 @@ def on_error(ws, error):
 def insert(host, port, table, values):
         query = f"insert into {table} values ('{values['ticker']}', '{values['side']}', '{values['exch']}', {values['amount']}, {values['price']}, systimestamp())"
         r=requests.get(f"http://{host}:{port}/exec?query={query}")
-        print(r.text)
+        print(values['ticker'], values['amount'])
 def on_message(ws, message):
     response = json.loads(message)
     try:
@@ -36,7 +36,7 @@ def on_message(ws, message):
                 "price": float(response["data"]["o"]["p"])
             }
         insert("provider.bdl.computer", 30793, "binance_liquidations", msg)
-
+        
     except Exception as e:
         print(e)
 
