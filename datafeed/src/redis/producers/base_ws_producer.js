@@ -1,14 +1,12 @@
-// const redis = require('redis');
-// const publisher = redis.createClient();
-
-
-
 var W3CWebSocket = require('websocket').w3cwebsocket;
 
 var client = new W3CWebSocket('wss://fstream.binance.com/stream?streams=!forceOrder@arr');
 const redis = require('redis');
-
-
+const publisher = redis.createClient({socket: {
+    port: 30798,
+    host: "provider.bdl.computer",
+  }});
+  
 client.onerror = function() {
     console.log('Connection Error');
 };
@@ -22,7 +20,7 @@ client.onclose = function() {
 };
 
 client.onmessage = async function(e) {
-    const publisher = redis.createClient();
+
     await publisher.connect()
     if (typeof e.data === 'string') {
         var j = JSON.parse(e.data);

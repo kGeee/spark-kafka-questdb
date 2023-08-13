@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node producer.js & node test_producer.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@questdb/nodejs-client": "^1.0.4",
     "axios": "^1.4.0",
     "redis": "^4.6.7",
     "websocket": "^1.0.34"
