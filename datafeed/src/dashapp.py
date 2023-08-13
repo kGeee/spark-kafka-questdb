@@ -157,22 +157,13 @@ def liq_log():
 
 def main():
     st.set_page_config(page_title="Liquidations - Binance Alts", layout="wide")
-    hide = """#MainMenu {
-        visibility: hidden;
-        }
+    
+    hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
         """
-    st.markdown(
-    """
-    <style>
-    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
-    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
-    .viewerBadge_text__1JaDK {
-        display: none;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    st.markdown(hide_menu_style, unsafe_allow_html=True)        
     # if not "sleep_time" in st.session_state:
     #     st.session_state.sleep_time = 5
 
