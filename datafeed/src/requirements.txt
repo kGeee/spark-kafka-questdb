@@ -8,3 +8,4 @@ streamlit
 websockets
 cryptofeed
 aiokafka
+plotly
