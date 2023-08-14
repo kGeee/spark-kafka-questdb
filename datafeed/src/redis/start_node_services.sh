@@ -1,1 +1,1 @@
-node quest_producer.js & node producer.js
+node quest_producer.js & node producers/base_ws_producer.js 
