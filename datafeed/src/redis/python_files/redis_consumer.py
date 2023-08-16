@@ -15,10 +15,9 @@ async def reader(channel: redis.client.PubSub):
                 break
 
 async def main():
-    r = await redis.from_url("redis://localhost")
+    r = await redis.Redis(host="http://provider.bdl.compute", port =30798, socket_keepalive=True)
     async with r.pubsub() as pubsub:
-        await pubsub.psubscribe("channel:*")
-
+        await pubsub.psubscribe("liqs:binance")
         future = asyncio.create_task(reader(pubsub))
         await future
         

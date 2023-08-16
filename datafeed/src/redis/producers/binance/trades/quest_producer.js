@@ -1,22 +1,25 @@
 const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
-const refresh_buffer_rate = 1000;
+const refresh_buffer_rate = 10000;
 const quest_host = "provider.bdl.computer";
 const quest_port = 31399;
 const redis_host = "provider.bdl.computer";
 const redis_port = 30798;
-const channel = "channel:test";
-const bufferSize = 4096;
+const channel = "trades:binance_btc";
+const bufferSize = 10000;
 
 async function addMsg(sender, msg) {
-    console.log("ingesting", msg.ticker, "liquidation");
-    sender.table("binance_liquidations")
+    console.log("ingesting", msg.ticker, "trade");
+    sender.table("binance_trades_btc")
         .symbol("ticker", msg.ticker)
         .symbol("side", msg.side)
         .symbol("exch", msg.exch)
         .floatColumn("amount", msg.amount)
-        .floatColumn("price", msg.price).atNow();
+        .floatColumn("price", msg.price)
+        .booleanColumn("mm", msg.mm)
+        .intColumn("ts", msg.last_trade - msg.first_trade)
+        .atNow();
 }
 async function run() {
     const sender = new Sender({ bufferSize: bufferSize, log: 'error' });

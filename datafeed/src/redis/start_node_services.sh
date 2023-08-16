@@ -1,1 +1,1 @@
-node quest_producer.js & node producers/base_ws_producer.js 
+node producers/binance/liq/quest_producer.js & node producers/binance/liq/redis_producer.js 

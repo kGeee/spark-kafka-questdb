@@ -19,6 +19,7 @@ function parse(data){
     if (msg.amount > 10000) {
         console.log("Received from binance: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount), JSON.stringify(msg.mm));
     }
+    return msg;
 };
 
 client.onerror = function() {
@@ -40,8 +41,8 @@ client.onmessage = async function(e) {
       }});
     await publisher.connect()
     if (typeof e.data === 'string') {
-        parse(e.data);
-        // await publisher.publish('channel:test', JSON.stringify(msg));
+        var msg = parse(e.data);
+        await publisher.publish('trades:binance_btc', JSON.stringify(msg));
     }
 
 };

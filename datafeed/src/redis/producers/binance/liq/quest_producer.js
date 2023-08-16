@@ -6,7 +6,7 @@ const quest_host = "provider.bdl.computer";
 const quest_port = 31399;
 const redis_host = "provider.bdl.computer";
 const redis_port = 30798;
-const channel = "channel:test";
+const channel = "liqs:binance";
 const bufferSize = 4096;
 
 async function addMsg(sender, msg) {
@@ -26,9 +26,12 @@ async function run() {
             port: redis_port,
             host: redis_host,
         }
+    }).on('error', function (err) {
+        console.log(err);
     });
 
     await subscriber.connect();
+    console.log("connected to redis and quest");
     await subscriber.pSubscribe(channel, async (message) => {
         var msg = JSON.parse(message);
         await addMsg(sender, msg);
