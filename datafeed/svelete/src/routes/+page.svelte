@@ -46,11 +46,6 @@
 		dataTableHandler(model);
 	});
 
-	const tableSimple: TableSource = {
-		head: ['ticker', 'amount', 'side', 'price', 'ts'],
-		body: tableMapperValues(liq, ['ticker', 'amount', 'side', 'price', 'ts'])
-		// meta: tableMapperValues(liqTableStore, ['ticker', 'amount', 'side', 'ts']),
-	};
 
 
 </script>

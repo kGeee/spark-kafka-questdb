@@ -41,6 +41,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@aknakos/sveltekit-plotly": "^0.0.9",
 		"add": "^2.0.6",
 		"apexcharts": "^3.41.1",
 		"bufferutil": "^4.0.7",
