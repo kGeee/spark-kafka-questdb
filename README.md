@@ -75,6 +75,9 @@ dashboard that's updating in realtime!
 
 
 ### QUICKSTART
+
+Ensure you have flask and streamlit installed on your host machine
+
 In the datafeed directory
 1. `bash src/scripts/run.sh` - wait for all the services to start
 2. `bash src/scripts/create_sink.sh` - create sink for kafka connect -> questdb
