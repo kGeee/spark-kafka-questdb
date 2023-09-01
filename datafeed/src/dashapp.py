@@ -5,7 +5,7 @@ import time
 from datetime import date, timedelta
 import requests, json
 
-url="http://provider.hurricane.akash.pub:31191"
+url="http://provider.pcgameservers.com:30278"
 test = "http://localhost:8080"
 def get_latest_ts():
     resp = requests.get(f"{url}/latestTs", data={})

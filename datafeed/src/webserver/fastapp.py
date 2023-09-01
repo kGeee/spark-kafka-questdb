@@ -7,8 +7,8 @@ app = FastAPI()
 
 with open('queries.json') as f: queries = json.load(f)
 
-url = os.environ.get('URL',"provider.bdl.computer")
-port = os.environ.get('PORT', 30793)
+url = os.environ.get('URL',"provider.pcgameservers.com")
+port = os.environ.get('PORT', 31182)
 
 async def query_quest(query):
     timeout=httpx.Timeout(10, read=15.0)

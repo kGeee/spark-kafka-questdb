@@ -22,8 +22,8 @@ ws.onclose = function() {
 
 ws.onmessage = async function(e) {
     const publisher = redis.createClient({socket: {
-        port: 30399,
-        host: "provider.hurricane.akash.pub",
+        port: 32007,
+        host: "provider.pcgameservers.com",
       }});
       publisher.on('error', err => console.error('client error', err));
     await publisher.connect()
