@@ -2,10 +2,10 @@ const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
 const refresh_buffer_rate = 1000;
-const quest_host = "provider.bdl.computer";
-const quest_port = 31399;
-const redis_host = "provider.bdl.computer";
-const redis_port = 30798;
+const quest_host = "provider.hurricane.akash.pub";
+const quest_port = 31948;
+const redis_host = "provider.hurricane.akash.pub";
+const redis_port = 30399;
 const channel = "liqs:binance";
 const bufferSize = 4096;
 

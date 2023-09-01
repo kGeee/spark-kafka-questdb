@@ -15,57 +15,85 @@ console.log("connected to redis")
 
 
 var conns = [
-    {   
-        name: "binance_usdm_liq",
-        url: 'wss://fstream.binance.com/stream?streams=!forceOrder@arr',
-        on_open: {},
-        on_message: async function (e) {
-            if (typeof e.data === 'string') {
-                var j = JSON.parse(e.data);
-                var ticker = j.data.o.s;
-                var price = parseFloat(j.data.o.p, 4);
-                var amount = parseFloat(j.data.o.q, 4) * price;
-                var side = ((j.data.o.S == 'BUY') ? 'Short' : 'Long');
-                var t = j.data.o.T
-                var msg = {
-                    ticker: ticker,
-                    amount: amount,
-                    side: side,
-                    price: price,
-                    ts: t,
-                    exch: "BINANCE"
-                }
-                console.log("Received from binance: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
-                await publisher.publish('channel:binance_test', JSON.stringify(msg));
-                return false;
-            }
-        }
-    },
+    // {   
+    //     name: "binance_usdm_liq",
+    //     url: 'wss://fstream.binance.com/stream?streams=!forceOrder@arr',
+    //     on_open: {},
+    //     on_message: async function (e) {
+    //         if (typeof e.data === 'string') {
+    //             var j = JSON.parse(e.data);
+    //             var ticker = j.data.o.s;
+    //             var price = parseFloat(j.data.o.p, 4);
+    //             var amount = parseFloat(j.data.o.q, 4) * price;
+    //             var side = ((j.data.o.S == 'BUY') ? 'Short' : 'Long');
+    //             var t = j.data.o.T
+    //             var msg = {
+    //                 ticker: ticker,
+    //                 amount: amount,
+    //                 side: side,
+    //                 price: price,
+    //                 ts: t,
+    //                 exch: "BINANCE"
+    //             }
+    //             console.log("Received from binance: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
+    //             await publisher.publish('channel:binance_test', JSON.stringify(msg));
+    //             return false;
+    //         }
+    //     }
+    // },
+    // {
+    //     name: "okx_usd_swap",
+    //     url: 'wss://ws.okx.com:8443/ws/v5/public?event=subscribe?channel=liquidation-orders?instType=SWAP',
+    //     on_open: {
+    //         "op": "subscribe",
+    //         "args": [{"channel": "liquidation-orders", "instType": "SWAP"}],
+    //     },
+    //     on_message: async function (e) {
+    //         var j = JSON.parse(e.toString());
+    //         if (j.event  != 'subscribe') {
+    //             var ticker = j.data[0].uly;
+    //             var price = parseFloat(j.data[0].details[0].bkPx, 4);
+    //             var amount = parseFloat(j.data[0].details[0].sz, 4) * price;
+    //             var side = ((j.data[0].details[0].side == 'BUY') ? 'Short' : 'Long');
+    //             var t = j.data[0].details[0].ts
+    //             var msg = {
+    //                 ticker: ticker,
+    //                 amount: amount,
+    //                 side: side,
+    //                 price: price,
+    //                 ts: t,
+    //                 exch: "OKX"
+    //             }
+    //             console.log("Received from okx: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
+    //             await publisher.publish('channel:okx_test', JSON.stringify(msg));
+    //             return false;
+    //         }
+    //     }
+    // },
     {
-        name: "okx_usd_swap",
-        url: 'wss://ws.okx.com:8443/ws/v5/public?event=subscribe?channel=liquidation-orders?instType=SWAP',
-        on_open: {
-            "op": "subscribe",
-            "args": [{"channel": "liquidation-orders", "instType": "SWAP"}],
-        },
+        name: "hl_trades",
+        url: 'wss://api.hyperliquid.xyz/ws',
+        on_open: { "method": "subscribe", "subscription": { "type": "trades", "coin": "ETH" } },
         on_message: async function (e) {
-            var j = JSON.parse(e.toString());
-            if (j.event  != 'subscribe') {
-                var ticker = j.data[0].uly;
-                var price = parseFloat(j.data[0].details[0].bkPx, 4);
-                var amount = parseFloat(j.data[0].details[0].sz, 4) * price;
-                var side = ((j.data[0].details[0].side == 'BUY') ? 'Short' : 'Long');
-                var t = j.data[0].details[0].ts
-                var msg = {
-                    ticker: ticker,
-                    amount: amount,
-                    side: side,
-                    price: price,
-                    ts: t,
-                    exch: "OKX"
-                }
-                console.log("Received from okx: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
-                await publisher.publish('channel:okx_test', JSON.stringify(msg));
+            var j = e.toString();
+            console.log(j)
+            if (j  != 'subscribe') {
+                console.log(j)
+                // var ticker = j.data[0].uly;
+                // var price = parseFloat(j.data[0].details[0].bkPx, 4);
+                // var amount = parseFloat(j.data[0].details[0].sz, 4) * price;
+                // var side = ((j.data[0].details[0].side == 'BUY') ? 'Short' : 'Long');
+                // var t = j.data[0].details[0].ts
+                // var msg = {
+                //     ticker: ticker,
+                //     amount: amount,
+                //     side: side,
+                //     price: price,
+                //     ts: t,
+                //     exch: "OKX"
+                // }
+                // console.log("Received from HL: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
+                // await publisher.publish('channel:okx_test', JSON.stringify(msg));
                 return false;
             }
         }
@@ -89,6 +117,9 @@ async function connect(item) {
         if (item.name != "binance_usdm_liq") {
             client.send(JSON.stringify(item.on_open))
         }
+        setTimeout(function() {
+            client.ping();
+          }, 15000);
     });
 
     client.on('close', function () {
@@ -100,9 +131,7 @@ async function connect(item) {
 
     client.on('message', item.on_message);
 
-    setTimeout(function() {
-        client.ping();
-      }, 15000);
+    
 
 }
 
