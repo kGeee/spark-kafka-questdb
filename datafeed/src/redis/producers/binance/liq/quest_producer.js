@@ -1,7 +1,7 @@
 const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
-const refresh_buffer_rate = 1000;
+const refresh_buffer_rate = 500;
 const quest_host = "provider.pcgameservers.com";
 const quest_port = 32734;
 const redis_host = "provider.pcgameservers.com";

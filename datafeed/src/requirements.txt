@@ -1,11 +1,5 @@
 requests
 asyncio
-kafka-python
-numpy
-pandas
 datetime
-streamlit
 websockets
-cryptofeed
-aiokafka
-plotly
+httpx
