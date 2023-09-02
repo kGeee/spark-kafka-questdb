@@ -11,7 +11,7 @@ async def query_quest(query):
     timeout=httpx.Timeout(30, read=30)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.get(f"http://provider.pcgameservers.com:31182/exec", params={'query': query})
+            resp = await client.get(f"http://provider.pcgameservers-gpu.com:30941/exec", params={'query': query})
     except httpx.ReadTimeout:
         resp = await query_quest(query)
     return json.loads(resp.text)
