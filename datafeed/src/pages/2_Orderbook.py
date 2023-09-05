@@ -152,12 +152,12 @@ if __name__ == "__main__":
         </style>
         """
     st.markdown(hide_menu_style, unsafe_allow_html=True)
-
+    col1, col2, col3 = st.columns(3)
 
     options = st.multiselect(
         'Orderbooks to aggregate?',
         ['Coinbase', 'Gemini', 'Kraken'],
-        ['Coinbase', 'Gemini', 'Kraken'])
+        ['Coinbase', 'Kraken'])
 
     while True:
         ob = OrderBook()
@@ -171,48 +171,33 @@ if __name__ == "__main__":
         asks = pd.DataFrame({'prices': asks_price, 'depths': asks_size, 'side':'ask'})
         orderbook = pd.concat([bids, asks])
 
-        # https://stackoverflow.com/questions/62579826/altair-bar-chart-assign-specific-colors-based-on-dataframe-column
-        alt_chart = alt.Chart(orderbook, width = 1000, height = 600).mark_bar().encode(
-            x='prices',
-            y='depths',
-            color="side:N"
-            
-            )
-        
-
-        st_canvas.altair_chart(alt_chart, theme="streamlit")
+        with col2:
+            alt_chart = alt.Chart(orderbook, width = 1000, height = 600).mark_bar().encode(
+                x='prices',
+                y='depths',
+                color="side:N"
+                
+                )
+            st_canvas.altair_chart(alt_chart, theme="streamlit")
 
 
-        vp = ob.trades.groupby(['price','side'])['size'].sum().reset_index()
-        vp.columns = ['price', 'side', 'volume']
+            vp = ob.trades.groupby(['price','side'])['size'].sum().reset_index()
+            vp.columns = ['price', 'side', 'volume']        
+            base = alt.Chart(vp)
+            bar_args = {'opacity': 1, 'binSpacing': 0}
 
-        alt_chart2 = alt.Chart(vp, width = 1000, height = 600).mark_bar().encode(
-            x='price',
-            y='sum(volume)',
-            color="side:N"
-            )
-        
+            right_hist = base.mark_bar(**bar_args).encode(
+                alt.X('volume:Q',
+                    bin=alt.Bin(maxbins=20),
+                    stack=None,
+                    title='',
+                    ),
+                alt.Y('price', stack=True, title='', scale=alt.Scale(domain=[]),),
+                alt.Color('side:N'),
+            ).properties(width=1000, height=600)
+            st_vp.altair_chart(right_hist, theme="streamlit")
 
-        rule = alt.Chart(ob.trades).mark_rule(color='blue').encode(
-            y='mean(wheat):Q'
-        )
-        
-        base = alt.Chart(vp)
-        bar_args = {'opacity': 1, 'binSpacing': 0}
-
-        right_hist = base.mark_bar(**bar_args).encode(
-            alt.X('volume:Q',
-                bin=alt.Bin(maxbins=20),
-                stack=None,
-                title='',
-                ),
-            alt.Y('price', stack=True, title='', scale=alt.Scale(domain=[]),),
-            alt.Color('side:N'),
-        ).properties(width=1000, height=600)
-
-        st_vp.altair_chart(right_hist, theme="streamlit")
-
-        st_trade_log.dataframe(ob.trades, width=1000, height=600)
+            st_trade_log.dataframe(ob.trades, width=1000, height=600)
         time.sleep(1)
 
 
