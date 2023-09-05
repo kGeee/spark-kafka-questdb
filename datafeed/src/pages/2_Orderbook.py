@@ -170,7 +170,8 @@ if __name__ == "__main__":
         bids = pd.DataFrame({'prices': bids_price, 'depths': bids_size, 'side':'bid'})
         asks = pd.DataFrame({'prices': asks_price, 'depths': asks_size, 'side':'ask'})
         orderbook = pd.concat([bids, asks])
-
+        with col1: st.text('')
+        with col3: st.text('')
         with col2:
             alt_chart = alt.Chart(orderbook, width = 1000, height = 600).mark_bar().encode(
                 x='prices',
