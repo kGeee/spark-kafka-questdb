@@ -13,7 +13,6 @@ hide_menu_style = """
         </style>
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
-st.sidebar.success("Select a dashboard")
 
 st.markdown(
     """

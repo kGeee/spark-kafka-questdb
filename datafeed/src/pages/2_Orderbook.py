@@ -194,8 +194,8 @@ if __name__ == "__main__":
             ).properties(height=600)
             st_vp.altair_chart(right_hist, theme="streamlit", use_container_width=True)
 
-        st_trade_log.dataframe(ob.trades, width=1000, height=600)
+        st_trade_log.dataframe(ob.trades, height=600, use_container_width=True)
         
-        time.sleep(1)
+        time.sleep(.5)
 
 
