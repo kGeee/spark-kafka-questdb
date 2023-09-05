@@ -15,9 +15,9 @@ class OrderBook:
         self.trades = pd.DataFrame()
 
     def getCoinbase(self):
-        print("getting coinbase data")
+
         def getBook():
-            print("getting coinbase book")
+
             coin = {}
             headers = {
                     'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ class OrderBook:
             self.add_to_agg_ob(coin)
 
         def getTrades():
-            print("getting coinbase trades")
+
             headers = {
                     'Content-Type': 'application/json'
                     }
@@ -47,9 +47,9 @@ class OrderBook:
 
 
     def getKraken(self):
-        print("getting kraken data")
+
         def getBook():
-            print("getting kraken book")
+
             kraken = {}
             headers = {
                     'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ class OrderBook:
             self.add_to_agg_ob(kraken)
 
         def getTrades():
-            print("getting kraken trades")
+
 
             headers = {
                     'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ class OrderBook:
         # getTrades()
 
     def getGemini(self):
-        print("getting gemini book")
+
         gemini = {}
         headers = {
                 'Content-Type': 'application/json'
@@ -152,13 +152,13 @@ if __name__ == "__main__":
         </style>
         """
     st.markdown(hide_menu_style, unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
 
     options = st.multiselect(
         'Orderbooks to aggregate?',
         ['Coinbase', 'Gemini', 'Kraken'],
         ['Coinbase', 'Kraken'])
-
+    col1, col2 = st.columns(2)
+    
     while True:
         ob = OrderBook()
         if 'Coinbase' in options: ob.getCoinbase()
@@ -170,35 +170,32 @@ if __name__ == "__main__":
         bids = pd.DataFrame({'prices': bids_price, 'depths': bids_size, 'side':'bid'})
         asks = pd.DataFrame({'prices': asks_price, 'depths': asks_size, 'side':'ask'})
         orderbook = pd.concat([bids, asks])
-        with col1: st.text('')
-        with col3: st.text('')
-        with col2:
+        with col1:
             alt_chart = alt.Chart(orderbook, width = 1000, height = 600).mark_bar().encode(
                 x='prices',
                 y='depths',
                 color="side:N"
                 
                 )
-            st_canvas.altair_chart(alt_chart, theme="streamlit")
-
-
+            st_canvas.altair_chart(alt_chart, theme="streamlit", use_container_width=True)
+            
             vp = ob.trades.groupby(['price','side'])['size'].sum().reset_index()
             vp.columns = ['price', 'side', 'volume']        
             base = alt.Chart(vp)
             bar_args = {'opacity': 1, 'binSpacing': 0}
 
-            right_hist = base.mark_bar(**bar_args).encode(
-                alt.X('volume:Q',
-                    bin=alt.Bin(maxbins=20),
+            right_hist = base.mark_bar().encode(
+                alt.X('price',
                     stack=None,
                     title='',
                     ),
-                alt.Y('price', stack=True, title='', scale=alt.Scale(domain=[]),),
+                alt.Y('volume', title='', scale=alt.Scale(domain=[]),),
                 alt.Color('side:N'),
-            ).properties(width=1000, height=600)
-            st_vp.altair_chart(right_hist, theme="streamlit")
+            ).properties(height=600)
+            st_vp.altair_chart(right_hist, theme="streamlit", use_container_width=True)
 
-            st_trade_log.dataframe(ob.trades, width=1000, height=600)
+        st_trade_log.dataframe(ob.trades, width=1000, height=600)
+        
         time.sleep(1)
 
 
