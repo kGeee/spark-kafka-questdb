@@ -140,9 +140,20 @@ def transform_data(agg_ob):
     return bids_price, bids_size, asks_price, asks_size
     
 if __name__ == "__main__":
+    st.set_page_config(page_title="Orderbook", layout="wide")
     st_canvas = st.empty()
     st_vp = st.empty()
     st_trade_log = st.empty()
+
+    hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        .css-zq5wmm {visibility: hidden;}
+        </style>
+        """
+    st.markdown(hide_menu_style, unsafe_allow_html=True)
+
+
     options = st.multiselect(
         'Orderbooks to aggregate?',
         ['Coinbase', 'Gemini', 'Kraken'],

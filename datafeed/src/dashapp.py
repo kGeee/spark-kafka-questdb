@@ -6,7 +6,13 @@ st.set_page_config(
 )
 
 st.write("# Welcome to Datafeeds! 👋")
-
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        .css-zq5wmm {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 st.sidebar.success("Select a dashboard")
 
 st.markdown(
