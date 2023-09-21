@@ -5,8 +5,8 @@ import time
 from datetime import date, timedelta
 import requests, json
 
-url="http://provider.kloudmos.com:31030"
-# url = "http://localhost:54400"
+# url="http://provider.kloudmos.com:31030"
+url = "http://localhost:8080"
 def get_latest_ts():
     resp = requests.get(f"{url}/latestTs", data={})
     try:

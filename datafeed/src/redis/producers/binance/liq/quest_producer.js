@@ -2,10 +2,10 @@ const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
 const refresh_buffer_rate = 500;
-const quest_host = "provider.pcgameservers-gpu.com";
-const quest_port = 30557;
-const redis_host = "provider.pcgameservers-gpu.com";
-const redis_port = 31294;
+const quest_host = "provider.bdl.computer";
+const quest_port = 32123;
+const redis_host = "provider.bdl.computer";
+const redis_port = 32757;
 const channel = "liqs:binance";
 const bufferSize = 4096;
 
@@ -28,6 +28,12 @@ async function run() {
         }
     }).on('error', function (err) {
         console.log(err);
+        subscriber = redis.createClient({
+            socket: {
+                port: redis_port,
+                host: redis_host,
+            }
+        })
     });
 
     await subscriber.connect();
