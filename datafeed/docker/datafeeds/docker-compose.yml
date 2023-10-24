@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+
+  questdb:
+    image: questdb/questdb:6.6.1
+    hostname: questdb
+    container_name: questdb
+    ports:
+      - "9000:9000"
+      - "9009:9009"
+      
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6379:6379'
+    
+  webserver:
+    image: kgeeee/datafeed_webserver:latest
+    container_name: webserver
+    ports:
+      - "64013:64013"
+
+  producers:
+    image: kgeeee/datafeed_producers:latest
+    container_name: producers
+

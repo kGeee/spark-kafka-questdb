@@ -1,5 +1,5 @@
 #!/bin/bash
-FROM --platform=linux/amd64 node:alpine
+FROM node:alpine
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,9 @@ RUN npm install redis
 RUN npm install websocket
 RUN npm install @questdb/nodejs-client
 
+RUN apk add --no-cache bash
+
 COPY . .
 
-CMD ["bash", "entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 

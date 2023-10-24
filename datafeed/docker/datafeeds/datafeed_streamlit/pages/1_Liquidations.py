@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import requests, json
 
 # url="http://provider.kloudmos.com:31030"
-url = "http://localhost:8080"
+url = "http://0.0.0.0:64013"
 def get_latest_ts():
     resp = requests.get(f"{url}/latestTs", data={})
     try:
@@ -63,15 +63,20 @@ def liq_lookback(tf="15m"):
 
 def liq_progress(threshold=1000000):
     df = hit_endpoint("query/amountLiqd")
-    try: longs_liqd = int(df[df["side"] == "Long"]["sum"][0])
-    except KeyError: longs_liqd = int(df[df["side"] == "Long"]["sum"][1])
-    try: shorts_liqd = int(df[df["side"] == "Short"]["sum"][1])
-    except KeyError: shorts_liqd = int(df[df["side"] == "Short"]["sum"][0])
+
+    long, short = 0, 0
+
+    for d in df.to_dict('records'):
+        try:
+            if d["side"] == "Long": long = d["sum"]
+            if d["side"] == "Short": short = d["sum"]
+        except KeyError: pass
+
     col1, col2 = st.columns(2)
-    col1.metric("Longs liqd", f"${int(longs_liqd)}")
-    col2.metric("Shorts liqd", f"${int(shorts_liqd)}")
-    st.progress((longs_liqd % threshold) / threshold, text="longs liqd")
-    st.progress((shorts_liqd % threshold) / threshold, text="shorts liqd")
+    col1.metric("Longs liqd", f"${int(long)}")
+    col2.metric("Shorts liqd", f"${int(short)}")
+    st.progress((long % threshold) / threshold, text="longs liqd")
+    st.progress((short % threshold) / threshold, text="shorts liqd")
 
 def liq_count_and_amount():
     liq_count_amount = hit_endpoint("query/liqCountAmount")

@@ -11,7 +11,7 @@ async def query_quest(query):
     timeout=httpx.Timeout(30, read=30)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.get(f"http://provider.bdl.computer:30908/exec", params={'query': query})
+            resp = await client.get(f"http://host.docker.internal:9000/exec", params={'query': query})
     except httpx.ReadTimeout:
         resp = await query_quest(query)
     return json.loads(resp.text)
@@ -45,4 +45,4 @@ async def get_liqsMinutely(tf):
     return result
 
 if __name__=='__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8080)
+    uvicorn.run(app, host='0.0.0.0', port=64013)

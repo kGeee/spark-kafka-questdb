@@ -3,7 +3,10 @@ var W3CWebSocket = require('websocket').w3cwebsocket;
 var ws = new W3CWebSocket('wss://fstream.binance.com/stream?streams=!forceOrder@arr');
 const redis = require('redis');
 const config = {
-    min_amount: 500
+    min_amount: 500,
+    redis_port: 6379,
+    redis_host: "host.docker.internal",
+    redis_topic: 'liqs:binance'
 }
 var buf = [];
 var re = redis.RedisClientType;
@@ -13,17 +16,17 @@ ws.onerror = function() {
 };
 
 ws.onopen = function() {
-    console.log('WebSocket Client Connected');
+    console.log("----- WEBSOCKET CONSUMER -----");
 };
 
 ws.onclose = function() {
-    console.log('echo-protocol Client Closed');
+    console.log('CONSUMER: Client Closed');
 };
 
 ws.onmessage = async function(e) {
     const publisher = redis.createClient({socket: {
-        port: 32757,
-        host: "provider.bdl.computer",
+        port: config.redis_port,
+        host: config.redis_host,
       }});
       publisher.on('error', err => console.error('client error', err));
     await publisher.connect()
@@ -40,14 +43,14 @@ ws.onmessage = async function(e) {
         
         if (msg.amount > config.min_amount) {
             buf.push(JSON.stringify(msg));
-            console.log("Received from binance: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
+            console.log("CONSUMER: ", JSON.stringify(msg.ticker), JSON.stringify(msg.amount));
     }
 }
 setInterval(async () => {
     
     while (buf.length > 0) {
         try {
-            await publisher.publish('liqs:binance', buf.shift());
+            await publisher.publish(config.redis_topic, buf.shift());
         } catch (err) {
             console.error('publish error', err);
         }

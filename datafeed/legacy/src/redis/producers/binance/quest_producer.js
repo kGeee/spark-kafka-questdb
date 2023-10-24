@@ -2,15 +2,15 @@ const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
 const refresh_buffer_rate = 500;
-const quest_host = "provider.bdl.computer";
-const quest_port = 32123;
-const redis_host = "provider.bdl.computer";
-const redis_port = 32757;
+const quest_host = "host.docker.internal";
+const quest_port = 9009;
+const redis_host = "host.docker.internal";
+const redis_port = 6379;
 const channel = "liqs:binance";
 const bufferSize = 4096;
 
 async function addMsg(sender, msg) {
-    console.log("ingesting", msg.ticker, "liquidation");
+    console.log("PRODUCER: ", msg.ticker);
     sender.table("binance_liquidations")
         .symbol("ticker", msg.ticker)
         .symbol("side", msg.side)
@@ -37,7 +37,7 @@ async function run() {
     });
 
     await subscriber.connect();
-    console.log("connected to redis and quest");
+    console.log("----- QUEST PRODUCER -----");
     await subscriber.pSubscribe(channel, async (message) => {
         var msg = JSON.parse(message);
         await addMsg(sender, msg);
@@ -45,7 +45,7 @@ async function run() {
     setInterval(async function post_msg() {
         sender.flush().then((result) => {
             if (result == true) {
-                console.log("flushed buffer")
+                console.log("PRODUCER: FLUSHED BUFFER")
             }
         }).catch((error) => {
             console.log(error);

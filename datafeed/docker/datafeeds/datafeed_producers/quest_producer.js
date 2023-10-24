@@ -1,25 +1,22 @@
 const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
-const refresh_buffer_rate = 10000;
-const quest_host = "provider.bdl.computer";
-const quest_port = 31399;
-const redis_host = "provider.bdl.computer";
-const redis_port = 30798;
-const channel = "trades:binance_btc";
-const bufferSize = 10000;
+const refresh_buffer_rate = 500;
+const quest_host = "host.docker.internal";
+const quest_port = 9009;
+const redis_host = "host.docker.internal";
+const redis_port = 6379;
+const channel = "liqs:binance";
+const bufferSize = 4096;
 
 async function addMsg(sender, msg) {
-    console.log("ingesting", msg.ticker, "trade");
-    sender.table("binance_trades_btc")
+    console.log("PRODUCER: ", msg.ticker);
+    sender.table("binance_liquidations")
         .symbol("ticker", msg.ticker)
         .symbol("side", msg.side)
         .symbol("exch", msg.exch)
         .floatColumn("amount", msg.amount)
-        .floatColumn("price", msg.price)
-        .booleanColumn("mm", msg.mm)
-        .intColumn("ts", msg.last_trade - msg.first_trade)
-        .atNow();
+        .floatColumn("price", msg.price).atNow();
 }
 async function run() {
     const sender = new Sender({ bufferSize: bufferSize, log: 'error' });
@@ -29,9 +26,18 @@ async function run() {
             port: redis_port,
             host: redis_host,
         }
+    }).on('error', function (err) {
+        console.log(err);
+        subscriber = redis.createClient({
+            socket: {
+                port: redis_port,
+                host: redis_host,
+            }
+        })
     });
 
     await subscriber.connect();
+    console.log("----- QUEST PRODUCER -----");
     await subscriber.pSubscribe(channel, async (message) => {
         var msg = JSON.parse(message);
         await addMsg(sender, msg);
@@ -39,7 +45,7 @@ async function run() {
     setInterval(async function post_msg() {
         sender.flush().then((result) => {
             if (result == true) {
-                console.log("flushed buffer")
+                console.log("PRODUCER: FLUSHED BUFFER")
             }
         }).catch((error) => {
             console.log(error);

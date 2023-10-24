@@ -7,26 +7,24 @@ This is a docker-compose application that creates various images to create a rea
 This is a standalone application and should not be used in a production environment.
 
 This system includes the following technologies
-1. Apache Kafka
-2. Apache Spark
+1. Redis
+2. NodeJS
 3. QuestDB
 4. Python
 
 
-### Apache Kafka
-Distributed event streaming platform
-Allows us to handle messages from various places with a publisher/subscriber model. We can create topics to stream to and from using Kafka as a broker. In this application, we are using a Kafka Connect sink to transfer our data from the broker into the QuestDB database as the events come in. 
+### Redis
+in-memory kv store. currently using pub/sub functionality by pushing/pulling from specific channel. Will implement timestreams as well. But typically data is pushed to an analytical/archival data store after being ingested. 
+
 
 ###  QuestDB
 Timeseries optimized database built on top of Postgres
-Allows sampling of data by buckets - SAMPLE keyword
 
 ### Webserver
-Currently using Flask as a backend to connect to QuestDB REST API
+Currently using FastAPI as a backend to connect to QuestDB REST API
 Endpoints are the specified queries built for the dashboard.
 
-To create new queries you simply need to add your query to the queries.json file. You can then use them in the streamlit application by calling `hitEndpoint(key)`, where key is the key you specified in the json file. If you need to do extra processing or parameterize the query, you can 
-create a new endpoint in the Flask app. 
+To create new queries you simply need to add your query to the queries.json file. You can then use them in the streamlit application by calling `hitEndpoint(key)`, where key is the key you specified in the json file. If you need to do extra processing or parameterize the query, you can create a new API endpoint in the FastAPI app. 
 
 ### Streamlit
 
@@ -34,134 +32,36 @@ Streamlit dashboard populates via the queries specified in the queries.json file
 
 We achieve "pseudo realtime updates" by polling the database for the latest timestamp every N seconds and refresh data if newer timestamp arrives. 
 
-### Producers
-This project currently employs both a direct websocket connection to the Binance forceOrder server along with utilizing the cryptofeed library to producer messages to the Kafka broker. However, creating new connections should be relatively straightforward using the ws_server.py file as an example. 
+## Producers
 
-
-## Setup
-
-The set up process for this application should be relatively straight forward. The example included contains implementation for a websocket 
-connection and a telegram connection, but you can use any data source you want as long as you create a producer and send messages to the Kafka topic.  
-
-To spin up the application, run `docker compose build` in the datafeed directory. This should build the application
-Then run `docker compose up` to start the application. Give it a couple of minutes to get bootup up properly. 
-
-You can take a look at the Kafka UI by visiting `http://localhost:8080/`. You can add the broker via the exposed hostname and port configured in the docker-compose. `broker:29092`
-
-Now that the broker is set up, we need to create the sink for our data to reach the QuestDB server as its received by our broker. Producers are subscribed to the 'alt_liquidations' topic. You can easily create new topics by changing the topic variable however you must also remember to configure a sink with that new topic name to ensure the data gets to QuestDB
-
-Creating the Kafka Connect sink is relatively straightforward. As per the Docker compose application, Kafka Connect exports port 8083. We simply create a POST request to the connectors endpoint with some configs to create the connector. Example request json has been provided in the kafka-connect-sinks folder along with an simple script to post the request. Run the `create_connect_sink.py` script with the config that you choose. Things to note are that the names of connectors are to be unique and that you can have multiple topics per connector via comma-separated values. 
-
-After the connector is created and running, you should be ready to turn on the producers. 
-To do so, enter into the docker shell for the jupyter-client, navigate to the work folder via
-`cd work`
-
-From here, depending on which producers you want to turn on, you can turn on the producer by executing the python function. 
-`python ws_server.py`
-
-You can also visit QuestDB query playground via `localhost:9000`. 
-
-Once the producers have turned on, to monitor the data flowing in we can use the KafkaUI that's also included within the Dockerfile. 
-This is definitely not needed to use the project but can be helpful while debugging. 
-
-Finally, we need to turn on our webserver so that our streamlit frontend can get data from the QuestDB database! 
-Navigate to the `work/src/webserver` directory and run `python app.py`.
-Notice that the queries.json file is where the queries for the backend live. You can create new queries by adding them in that file 
-along with creating a new endpoint in the Flask app. 
-
-Finally, you can start the streamlit application by using the command `streamlit run dashapp.py`. You should be welcomed with a 
-dashboard that's updating in realtime!
+Uses nodejs to connect to websocket channel and produces messages to specified a redis channel. Separate script is running to capture and redirect data to QuestDB. Creating new methods of delivery will be instrumental. We want to be able to pull messages from our specific redis channel and push them out via webhook, rest, websocket, etc. 
 
 
 
-### QUICKSTART
-In the datafeed directory
-1. bash src/scripts/run.sh - wait for all the services to start
-2. bash src/scripts/create_sink.sh - create sink for kafka connect -> questdb
-3. bash src/scripts/start_dashboard.sh - start producer within python container, start webserver and streamlit dash
+### Datafeeds
+
+We now are using Redis as a pub/sub broker to handle messages. We will have producers and consumers to and from the redis server populating a Postgres (QuestDB) database. 
+
+We will have a FastAPI server running in order to connect to the QuestDB database. This webserver will be used via a Streamlit or Svelte web application to create and visualize data. 
 
 
-'CREATE TABLE test (ticker SYMBOL capacity 100 cache index capacity 4,
+Docker:
+1. Redis - OSS
+2. QuestDB - OSS
+3. Backend Webserver
+  - datafeeds/datafeed_webserver
+4. Frontend hosting
+  - Currently Streamlit, Soon to be Svelete
+  - datafeeds/datafeed_streamlit is the current hosted version with src/pages holding page code
+5. Producers
+  - datafeeds/datafeed_producers
+
+Use the docker compose file to start all services. Make sure to create the table in QuestDB or the streamlit application will not properly work. 
+
+'CREATE TABLE binance_liquidations (ticker SYMBOL capacity 100 cache index capacity 4,
                    side SYMBOL capacity 5 cache index capacity 4,
                    exch SYMBOL capacity 5 cache index capacity 4,
                    amount FLOAT,
                    price FLOAT,
                   timestamp TIMESTAMP) 
                 timestamp(timestamp);'
-
----
-version: '2.0'
-services:
-  kafka:
-    image: 'bitnami/kafka:latest'
-    expose:
-      - port: 9092
-        as: 9092
-        to:
-          - global: true
-      - port: 9094
-        as: 9094
-        to:
-          - global: true
-    env:
-      - KAFKA_CFG_NODE_ID=0
-      - 'KAFKA_CFG_PROCESS_ROLES=controller,broker'
-      - >-
-        KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      - >-
-        KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - 'KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093'
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - >-
-        KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-
-            env:
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-      
-  kafkaui:
-    image: 'provectuslabs/kafka-ui:latest'
-    expose:
-      - port: 8080
-        as: 8080
-        to:
-          - global: true
-    env:
-      - DYNAMIC_CONFIG_ENABLED='true'
-profiles:
-  compute:
-    kafka:
-      resources:
-        cpu:
-          units: 2
-        memory:
-          size: 2Gi
-        storage:
-          - size: 1Gi
-    kafkaui:
-      resources:
-        cpu:
-          units: 0.5
-        memory:
-          size: 512Mi
-        storage:
-          - size: 265Mi
-  placement:
-    dcloud:
-      pricing:
-        kafka:
-          denom: uakt
-          amount: 1000
-        kafkaui:
-          denom: uakt
-          amount: 1000
-deployment:
-  kafka:
-    dcloud:
-      profile: kafka
-      count: 1
-  kafkaui:
-    dcloud:
-      profile: kafkaui
-      count: 1
