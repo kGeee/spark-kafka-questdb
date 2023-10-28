@@ -1,5 +1,3 @@
-import os
-from pprint import pprint
 import json
 from kafka import KafkaConsumer
 

@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI, BackgroundTasks
 import json
 import httpx
+import os
 
 app = FastAPI()
 
@@ -11,7 +12,7 @@ async def query_quest(query):
     timeout=httpx.Timeout(30, read=30)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.get(f"http://host.docker.internal:9000/exec", params={'query': query})
+            resp = await client.get(f"http://{os.environ['QUEST_URL']}:9000/exec", params={'query': query})
     except httpx.ReadTimeout:
         resp = await query_quest(query)
     return json.loads(resp.text)

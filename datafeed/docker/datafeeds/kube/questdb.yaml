@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: questdb
+  name: questdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: questdb
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: questdb
+    spec:
+      containers:
+        - image: questdb/questdb:6.6.1
+          name: questdb
+          ports:
+            - containerPort: 9000
+              hostPort: 9000
+              protocol: TCP
+            - containerPort: 9009
+              hostPort: 9009
+              protocol: TCP
+          resources: {}
+      hostname: questdb
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: questdb
+  name: questdb
+spec:
+  type: NodePort
+  ports:
+    - name: "9000"
+      port: 9000
+      targetPort: 9000
+      nodePort: 30000
+    - name: "9009"
+      port: 9009
+      targetPort: 9009
+      nodePort: 30009
+  selector:
+    io.kompose.service: questdb
+status:
+  loadBalancer: {}

@@ -3,11 +3,12 @@ FROM node:alpine
 
 WORKDIR /usr/src/app
 
+RUN apk add --no-cache python3 py3-pip make g++
+
 RUN npm install redis
 RUN npm install websocket
 RUN npm install @questdb/nodejs-client
 
-RUN apk add --no-cache bash
 
 COPY . .
 

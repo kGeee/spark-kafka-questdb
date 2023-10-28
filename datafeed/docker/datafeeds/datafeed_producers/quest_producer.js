@@ -1,15 +1,19 @@
 const { Sender } = require("@questdb/nodejs-client");
 const redis = require('redis');
 
+// This producer is responsible for pulling data from redis topics and pushing it to QuestDB
+
+// Flush buffer every 500ms
 const refresh_buffer_rate = 500;
-const quest_host = "host.docker.internal";
+const quest_host = process.env.QUEST_URL;
 const quest_port = 9009;
-const redis_host = "host.docker.internal";
+const redis_host = process.env.REDIS_URL;
 const redis_port = 6379;
 const channel = "liqs:binance";
 const bufferSize = 4096;
 
 async function addMsg(sender, msg) {
+    // QuestDB Sender object creation
     console.log("PRODUCER: ", msg.ticker);
     sender.table("binance_liquidations")
         .symbol("ticker", msg.ticker)
@@ -39,6 +43,7 @@ async function run() {
     await subscriber.connect();
     console.log("----- QUEST PRODUCER -----");
     await subscriber.pSubscribe(channel, async (message) => {
+        // receive message and create Quest Sender object using Table Definition
         var msg = JSON.parse(message);
         await addMsg(sender, msg);
     });

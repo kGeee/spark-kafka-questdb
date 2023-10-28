@@ -1,11 +1,12 @@
 var W3CWebSocket = require('websocket').w3cwebsocket;
-
+// This is responsible for connecting to a data source and sending data through redis
+// Currently this uses a websocket and pushes to the specified redis topic
 var ws = new W3CWebSocket('wss://fstream.binance.com/stream?streams=!forceOrder@arr');
 const redis = require('redis');
 const config = {
     min_amount: 500,
     redis_port: 6379,
-    redis_host: "host.docker.internal",
+    redis_host: process.env.REDIS_URL,
     redis_topic: 'liqs:binance'
 }
 var buf = [];

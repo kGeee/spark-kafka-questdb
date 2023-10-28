@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: webserver
+  name: webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: webserver
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: webserver
+    spec:
+      containers:
+        - image: kgeeee/datafeed_webserver:latest
+          name: webserver
+          ports:
+            - containerPort: 64013
+              hostPort: 64013
+              protocol: TCP
+          resources: {}
+          env:
+          - name: QUEST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: quest-config
+                key: quest-url
+                
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: webserver
+  name: webserver
+spec:
+  type: NodePort
+  ports:
+    - name: "64013"
+      port: 64013
+      targetPort: 64013
+      nodePort: 30013
+  selector:
+    io.kompose.service: webserver
+status:
+  loadBalancer: {}

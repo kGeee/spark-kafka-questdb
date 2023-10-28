@@ -1,9 +1,6 @@
-from pprint import pprint
-import os
 import websocket as wb
-from pprint import pprint
 import json
-from kafka import KafkaProducer, KafkaConsumer
+from kafka import KafkaProducer
 import time
 from datetime import datetime
 
@@ -44,10 +41,11 @@ def on_message(ws, message):
         print("producing", msg['ticker'])
         producer.send(topic, value=json.dumps(msg).encode("utf-8"))
         
-    except Exception as e:
+    except Exception:
         pass
 
     
 
-ws = wb.WebSocketApp(url, on_open=on_open, on_close=on_close, on_error=on_error, on_message=on_message)
+ws = wb.WebSocketApp(url, on_open=on_open, on_close=on_close, on_error=on_error,
+                      on_message=on_message)
 ws.run_forever()

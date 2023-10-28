@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import requests, json
 
 # url="http://provider.kloudmos.com:31030"
-url = "http://0.0.0.0:64013"
+url = "http://127.0.0.1:59646"
 def get_latest_ts():
     resp = requests.get(f"{url}/latestTs", data={})
     try:

@@ -65,3 +65,13 @@ Use the docker compose file to start all services. Make sure to create the table
                    price FLOAT,
                   timestamp TIMESTAMP) 
                 timestamp(timestamp);'
+
+
+  ### INSTALLATION
+
+  1. Navigate to 'docker/datafeeds' directory
+  2. Run 'docker compose up' to start the docker container
+  3. Go to localhost:9000 to create tables for the data like the 'binance_liquidations' example
+  4. Navigate to 'datafeed_streamlit' and run 'streamlit run dashapp.py'
+  5. Navigate to the Streamlit application
+  
