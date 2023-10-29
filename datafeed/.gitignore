@@ -2,4 +2,3 @@ config.ini
 spark_demo.ipynb
 ws_server.py
 feedhandler.log
-testing/perspective/node_modules
