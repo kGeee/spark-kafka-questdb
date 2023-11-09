@@ -44,7 +44,12 @@
 
             // Create a client that expects a Perspective server to accept
             // Websocket connections at the specified URL.
-            const websocket = perspective.websocket("ws://localhost:8888/websocket");
+            const ws_url = "ws://localhost:8888/websocket";
+            const websocket = perspective.websocket(ws_url);
+            var ws = new WebSocket(ws_url);
+                ws.onopen = function() {
+                    ws.send('{\"msg\": \"hello\"}');
+                };
 
             /* This shows Perspective running in "server mode": the `table`
             variable is a proxy for the `Table` we created on the server.

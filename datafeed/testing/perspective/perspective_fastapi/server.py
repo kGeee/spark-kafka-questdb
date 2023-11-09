@@ -18,12 +18,20 @@ import tornado.web
 import tornado.ioloop
 from datetime import date, datetime
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
-import threading
 import concurrent.futures
 
 from connectors.Quest import Quest
 from functools import partial
 
+import uvicorn
+from fastapi import FastAPI, BackgroundTasks
+from starlette.responses import FileResponse
+from starlette.endpoints import WebSocketEndpoint, HTTPEndpoint
+from perspective import Table, PerspectiveManager, PerspectiveHandlerBase
+from starlette.routing import Route, WebSocketRoute
+from starlette.responses import HTMLResponse
+from starlette.applications import Starlette
+import os
 
 def perspective_thread(manager):
     """Perspective application thread starts its own tornado IOLoop, and
@@ -59,42 +67,40 @@ def perspective_thread(manager):
     b.start()
     psp_loop.start()
 
+app = Starlette()
 
+@app.route('/')
+async def homepage(request):
+    return FileResponse('index.html')
+    
 
-def make_app():
+@app.websocket_route('/websocket')
+async def websocket_endpoint(websocket):
+    class PerspectiveHandler(PerspectiveHandlerBase):
+        async def write_message(self, message: str, binary: bool = False):
+            await websocket.send_bytes(message)
+        
+        def on_message(self, *args, **kwargs):
+            return PerspectiveHandlerBase.on_message(self, *args, **kwargs)
+
+    await websocket.accept()
+    ph = PerspectiveHandler(**{'manager':manager, 'check_origin':True})
+    # Process incoming messages
+    while True:
+        mesg = await websocket.receive_text()
+        await ph.on_message(message=mesg)
+    await websocket.close()
+
+if __name__ == "__main__":
+
     manager = PerspectiveManager()
 
     thread = threading.Thread(target=perspective_thread, args=(manager,))
     thread.daemon = True
     thread.start()
 
-    return tornado.web.Application(
-        [
-            # create a websocket endpoint that the client Javascript can access
-            (
-                r"/websocket",
-                PerspectiveTornadoHandler,
-                {"manager": manager, "check_origin": True},
-            ),
-            (
-                r"/node_modules/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "../../node_modules/"},
-            ),
-            (
-                r"/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "./", "default_filename": "index.html"},
-            ),
-        ]
-    )
+    uvicorn.run(app, host='0.0.0.0', port=8888)
 
 
-if __name__ == "__main__":
-    app = make_app()
-    app.listen(8888)
-    logging.critical("Listening on http://localhost:8888")
-    loop = tornado.ioloop.IOLoop.current()
-    loop.start()
-
+    
 

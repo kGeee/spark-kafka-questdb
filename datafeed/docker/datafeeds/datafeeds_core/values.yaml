@@ -1,0 +1,41 @@
+kubernetesClusterDomain: cluster.local
+questdb:
+  ports:
+  - name: "9000"
+    nodePort: 30000
+    port: 9000
+    targetPort: 9000
+  - name: "9009"
+    nodePort: 30009
+    port: 9009
+    targetPort: 9009
+  questdb:
+    image:
+      repository: questdb/questdb
+      tag: 6.6.1
+  replicas: 1
+  type: NodePort
+redis:
+  ports:
+  - name: "6379"
+    nodePort: 30379
+    port: 6379
+    targetPort: 6379
+  redis:
+    image:
+      repository: bitnami/redis
+      tag: latest
+  replicas: 1
+  type: NodePort
+webserver:
+  ports:
+  - name: "64013"
+    nodePort: 30013
+    port: 64013
+    targetPort: 64013
+  replicas: 1
+  type: NodePort
+  webserver:
+    image:
+      repository: kgeeee/datafeed_webserver
+      tag: latest

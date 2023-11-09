@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-webserver
+  labels:
+    io.kompose.service: webserver
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.webserver.type }}
+  selector:
+    io.kompose.service: webserver
+  {{- include "datafeeds.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.webserver.ports | toYaml | nindent 2 -}}

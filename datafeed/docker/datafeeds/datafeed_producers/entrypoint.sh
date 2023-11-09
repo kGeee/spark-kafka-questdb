@@ -1,1 +1,1 @@
-node quest_producer.js & node redis_producer.js
+node quest_producer.js

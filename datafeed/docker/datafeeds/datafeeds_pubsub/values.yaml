@@ -1,0 +1,17 @@
+redisconfig:
+  redisUrl: localhost
+questConfig:
+  questUrl: localhost
+consumers:
+  consumers:
+    image:
+      repository: kgeeee/datafeed_consumers
+      tag: latest
+  replicas: 1
+kubernetesClusterDomain: cluster.local
+producers:
+  producers:
+    image:
+      repository: kgeeee/datafeed_producers
+      tag: latest
+  replicas: 1

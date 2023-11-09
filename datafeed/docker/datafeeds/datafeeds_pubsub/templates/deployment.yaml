@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-consumers
+  labels:
+    io.kompose.service: consumers
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.consumers.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: consumers
+    {{- include "datafeeds.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: consumers
+      {{- include "datafeeds.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: QUEST_URL
+          valueFrom:
+            configMapKeyRef:
+              key: quest-url
+              name: {{ include "datafeeds.fullname" . }}-quest-config
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              key: redis-url
+              name: {{ include "datafeeds.fullname" . }}-config
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.consumers.consumers.image.repository }}:{{ .Values.consumers.consumers.image.tag
+          | default .Chart.AppVersion }}
+        name: consumers
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-producers
+  labels:
+    io.kompose.service: producers
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.producers.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: producers
+    {{- include "datafeeds.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: producers
+      {{- include "datafeeds.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: QUEST_URL
+          valueFrom:
+            configMapKeyRef:
+              key: quest-url
+              name: {{ include "datafeeds.fullname" . }}-quest-config
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              key: redis-url
+              name: {{ include "datafeeds.fullname" . }}-config
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.producers.producers.image.repository }}:{{ .Values.producers.producers.image.tag
+          | default .Chart.AppVersion }}
+        name: producers
+        resources: {}
+      restartPolicy: Always

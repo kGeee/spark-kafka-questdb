@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-webserver
+  labels:
+    io.kompose.service: webserver
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.webserver.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: webserver
+    {{- include "datafeeds.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: webserver
+      {{- include "datafeeds.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: QUEST_URL
+          valueFrom:
+            configMapKeyRef:
+              key: quest-url
+              name: {{ include "datafeeds.fullname" . }}-quest-config
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.webserver.webserver.image.repository }}:{{ .Values.webserver.webserver.image.tag
+          | default .Chart.AppVersion }}
+        name: webserver
+        ports:
+        - containerPort: 64013
+          hostPort: 64013
+          protocol: TCP
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-questdb
+  labels:
+    io.kompose.service: questdb
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.questdb.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: questdb
+    {{- include "datafeeds.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: questdb
+      {{- include "datafeeds.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.questdb.questdb.image.repository }}:{{ .Values.questdb.questdb.image.tag
+          | default .Chart.AppVersion }}
+        name: questdb
+        ports:
+        - containerPort: 9000
+          hostPort: 9000
+          protocol: TCP
+        - containerPort: 9009
+          hostPort: 9009
+          protocol: TCP
+        resources: {}
+      hostname: questdb
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datafeeds.fullname" . }}-redis
+  labels:
+    io.kompose.service: redis
+  {{- include "datafeeds.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+    {{- include "datafeeds.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: redis
+      {{- include "datafeeds.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        - name: ALLOW_EMPTY_PASSWORD
+          value: 'yes'
+        image: {{ .Values.redis.redis.image.repository }}:{{ .Values.redis.redis.image.tag
+          | default .Chart.AppVersion }}
+        name: redis
+        ports:
+        - containerPort: 6379
+          hostPort: 6379
+          protocol: TCP
+        resources: {}
+      restartPolicy: Always

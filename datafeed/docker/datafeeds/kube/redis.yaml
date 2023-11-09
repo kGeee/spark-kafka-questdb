@@ -19,7 +19,7 @@ spec:
         io.kompose.service: redis
     spec:
       containers:
-        - image: redis
+        - image: redis/redis
           name: redis
           ports:
             - containerPort: 6379

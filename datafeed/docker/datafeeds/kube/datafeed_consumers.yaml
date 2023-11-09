@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: consumers
+  name: consumers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: consumers
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/datafeeds-default: "true"
+        io.kompose.service: consumers
+    spec:
+      containers:
+        - image: kgeeee/datafeed_consumers:latest
+          name: consumers
+          resources: {}
+          env:
+          - name: QUEST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: quest-config
+                key: quest-url
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: redis-url
+      restartPolicy: Always
+status: {}
