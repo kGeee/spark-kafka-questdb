@@ -20,10 +20,43 @@ from datetime import date, datetime
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 import threading
 import concurrent.futures
+import asyncio
 
 from connectors.Quest import Quest
 from functools import partial
 
+async def nance_usdm_liq_ws():
+    msg = {"method": "SUBSCRIBE", "params": ["!forceOrder@arr"], "id": 1}
+    topic = "alt_liquidations"
+
+    async with websockets.connect(
+        "wss://fstream.binance.com/stream?streams=!forceOrder@arr"
+    ) as ws:
+        while True:
+            await ws.send(json.dumps(msg))
+            response = await asyncio.wait_for(ws.recv(), timeout=30)
+            response = json.loads(response)
+            try:
+                msg = {
+                    "ticker": response["data"]["o"]["s"],
+                    "amount": round(
+                        float(response["data"]["o"]["q"])
+                        * float(response["data"]["o"]["p"]),
+                        4,
+                    ),
+                    "price": float(response["data"]["o"]["p"]),
+                    "side": "Short" if response["data"]["o"]["S"] == "BUY" else "Long",
+                    "timestamp": int(time.mktime(datetime.now().timetuple()) * 1000),
+                    "exch": "BINANCE",
+                }
+                producer.send(topic, value=json.dumps(msg).encode("utf-8"))
+                print(msg)
+            except Exception as e:
+                # print(f'Terminated', e)
+                ws = await websockets.connect("wss://fstream.binance.com/stream?streams=!forceOrder@arr")
+                
+
+            await asyncio.sleep(2)
 
 def perspective_thread(manager):
     """Perspective application thread starts its own tornado IOLoop, and

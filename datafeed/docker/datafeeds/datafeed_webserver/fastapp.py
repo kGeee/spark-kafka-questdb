@@ -88,6 +88,6 @@ if __name__=='__main__':
     thread.start()
 
     uvicorn.run(app, host='0.0.0.0', 
-                port=os.environ['WEBSERVER_PORT'],
+                port=int(os.environ['WEBSERVER_PORT']),
                 ssl_keyfile=os.environ['WEBSERVER_SSL_KEYFILE'],
                 ssl_certfile=os.environ['WEBSERVER_SSL_CERTFILE'],)
